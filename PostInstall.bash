@@ -10,12 +10,12 @@ Choix=""
 CSUP="A"
 CSDOWN="B"
 
-IN_FIELD="\033[48;5;17;38;5;255m"
-CL_ERR="\033[0;1;31m"
-CL_DTA="\033[0;1;33m"
-CL_MENUNORMAL="\033[48;5;17;1;33m"
-CL_MENUSELECT="\033[48;5;20;38;5;229m"
-CL_WINBCK="\033[0;1;47m"
+IN_FIELD="\033[44;1;33m"
+CL_ERR="\033[1;31m"
+CL_DTA="\033[1;33m"
+CL_MENUNORMAL="\033[44;1;33m"
+CL_MENUSELECT="\033[42;1;33m"
+CL_WINBCK="\033[47;1;47m"
 CL_RESET="\033[0m"
 
 USERNAME=`id -u -n`
@@ -42,7 +42,7 @@ function Erreur()
     read -n 1 -t 5 dummy
 }
 
-export Erreur  
+export -f Erreur  
 
 
 # Fonction center_str:
