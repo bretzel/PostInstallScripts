@@ -6,9 +6,9 @@ MESSAGE="   "
 Choix=""
 
 Files[0]="Arch.Home.sh"
-Files[1]="FixQtMicroScrollBug.sh"
-Files[2]="SetupNuage.sh"
-Files[3]="UnArchiveHome.sh"
+Files[1]="UnArchiveHome.sh"
+Files[2]="FixQtMicroScrollBug.sh"
+Files[3]="SetupNuage.sh"
 Files[4]="Archive.etc.sh"      
 
 CSUP="A"
@@ -424,10 +424,33 @@ export TITRE
 
 Archive()
 {
-  source ${Files[0]}
-  printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
-  read
+    source ${Files[0]}
+    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
+    read
 }
+
+DeArchive()
+{
+    source ${Files[1]}
+    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
+    read
+}
+
+
+FixQtScroll()
+{
+    source ${Files[2]}
+    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
+    read
+}
+
+ConfigureCloud()
+{
+    source ${Files[3]}
+    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
+    read
+}
+
 
 function Main()
 {
@@ -443,37 +466,19 @@ function Main()
 	    Archive
         ;;
 	2)
-        Clear 
-        gotoxy 1 7
-        printf "${REPONSE[1]}"
-	    #echo "Désarchiver"
-        gotoxy 2 10
-        printf "${Files[1]}"
-        read
-
+        DeArchive
 	    ;;
 	3)
-        Clear 
-        gotoxy 1 7
-	    echo "Réparer le bug Micro-Scolling de QT"
-        gotoxy 2 10
-        printf "${Files[2]}"
-        read
-
+        FixQtScroll
 	    ;;
 	4)  
-        Clear 
-        gotoxy 1 7
-        echo "[Auto-]Configurer le Nuage"
-        gotoxy 2 10
-        printf "${Files[3]}"
-        read
+        ConfigureCloud
 
 	    ;;
 	5)
         Clear
         gotoxy 1 7
-        printf "${Files[4]}"
+        printf "${Files[4]} : Pas encore implémenté"
         read
         
 	    ;;
