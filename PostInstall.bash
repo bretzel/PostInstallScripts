@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# (C) 2001-2018, Serge Lussier 
 PROGRAM="Scripts Post-Installation"
 TITRE=""
 MESSAGE="   "
@@ -74,7 +74,7 @@ center_str()
     y_pos=$(expr $y_pos / 2)
     
     return $x_pos
- }
+}
 
 center_x()
 {
@@ -147,8 +147,6 @@ function Clear()
     echo -e $txt #"$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
     gotoxy 1 1
 }
-
-
 
 
 
@@ -364,7 +362,7 @@ menu()
     gotoxy $(expr 2 + $x_pos) $(expr $w_dy_menu + 2 + $y_pos)
     printf "\033[0;31;47m[a|A]-HAUT | [b|B]-BAS"
     gotoxy $(expr 2 + $x_pos) $(expr $w_dy_menu + 3 + $y_pos)
-    printf "Chiffre ou [ENTER]-Exécuter"
+    printf "Chiffre ou [ENTER]: Exécuter"
     let current_item=0
     Select selected
     gotoxy 1 15; printf "\033[0m"
@@ -394,16 +392,15 @@ menu()
             REPONSE[1]=${item[$current_item]}
             Select selected
         ;;
+
         [1-9])
-            if [ $clef -le $nbItems ]; then
-                REPONSE[0]=$clef
+            if [ $clef -le $nbItems ]; then REPONSE[0]=$clef
             REPONSE[1]=${item[$(expr $clef - 1)]}
             break;
         fi
         ;;
             *)
-            if [ -z $clef ] ; then
-                    REPONSE[0]=$(expr $current_item + 1)
+            if [ -z $clef ] ; then REPONSE[0]=$(expr $current_item + 1)
                 REPONSE[1]=${item[$current_item]}
             break;
         fi
@@ -424,6 +421,14 @@ menu()
 export gotoxy question Clear
 export TITRE
 
+
+Archive()
+{
+  source ${Files[0]}
+  printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
+  read
+}
+
 function Main()
 {
     let sel=0
@@ -434,14 +439,9 @@ function Main()
 	menu Archiver Désarchiver "Réparer le bug Micro-Scolling de QT" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
 	let sel=${REPONSE[0]}
 	case $sel in
-	1)
-        Clear 
-        gotoxy 1 7
-	    printf "${REPONSE[1]}"
-        gotoxy 2 10
-        printf "${Files[0]}"
-        read
-	    ;;
+	1)    
+	    Archive
+        ;;
 	2)
         Clear 
         gotoxy 1 7
