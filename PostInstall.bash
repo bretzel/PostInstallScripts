@@ -5,7 +5,11 @@ TITRE=""
 MESSAGE="   "
 Choix=""
 
-
+Files[0]="Arch.Home.sh"
+Files[1]="FixQtMicroScrollBug.sh"
+Files[2]="SetupNuage.sh"
+Files[3]="UnArchiveHome.sh"
+Files[4]="Archive.etc.sh"      
 
 CSUP="A"
 CSDOWN="B"
@@ -233,7 +237,7 @@ question()
 	   [ $((++c)) ]
 	fi
     done
-    copyright="(C)$(date '+Y'), Serge Lussier"
+    copyright="(C)2001-$(date '+%Y'), Serge Lussier"
     len=${#copyright}
     gotoxy $(expr $x_pos + $longueur - $len + 2) $(expr $y_pos + $nblignes - 1)
     printf "\033[30;47m$copyright\033[0m\n"
@@ -242,9 +246,9 @@ question()
     while [ $c -le $nbQuestions ]
     do
         gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
-	printf $IN_FIELD
-	read REPONSE[$c]
-	[ $((++c)) ]
+        printf $IN_FIELD
+        read REPONSE[$c]
+        [ $((++c)) ]
     done
     printf "\033[0m\n"
  }
@@ -332,35 +336,35 @@ menu()
     while [ $c -lt $nbItems ]
     do
         gotoxy $(expr 3 + $x_pos) $(expr $c + 2 + $y_pos)
-	    printf "$CL_MENUNORMAL${mitem[$c]}"
-	    [ $((++c)) ]
+        printf "$CL_MENUNORMAL${mitem[$c]}"
+        [ $((++c)) ]
     done
     gotoxy $x_pos $(expr $w_dy_menu + 4 + $y_pos)
 # Fonction Select:
 # Affiche l'item courant du menu selon son etat
     function Select()
     {
-       case $1 in
-          normal)
-	  gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-          printf "$CL_MENUNORMAL${ligne:0:$w_menu}"
-	  gotoxy $(expr 3 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-	  printf "$CL_MENUNORMAL${mitem[$current_item]}"
-	  gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-	;;
-	  selected)
-          gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-	  printf "$CL_MENUSELECT${ligne:0:$w_menu}"
-	  gotoxy $(expr 3 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-	  printf "$CL_MENUSELECT${mitem[$current_item]}"
-	  gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
-	;;
-       esac
+        case $1 in
+            normal)
+        gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+            printf "$CL_MENUNORMAL${ligne:0:$w_menu}"
+        gotoxy $(expr 3 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+        printf "$CL_MENUNORMAL${mitem[$current_item]}"
+        gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+    ;;
+        selected)
+            gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+        printf "$CL_MENUSELECT${ligne:0:$w_menu}"
+        gotoxy $(expr 3 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+        printf "$CL_MENUSELECT${mitem[$current_item]}"
+        gotoxy $(expr 2 + $x_pos)  $(expr $current_item + 2 + $y_pos)
+    ;;
+        esac
     }
     gotoxy $(expr 2 + $x_pos) $(expr $w_dy_menu + 2 + $y_pos)
     printf "\033[0;31;47m[a|A]-HAUT | [b|B]-BAS"
-	gotoxy $(expr 2 + $x_pos) $(expr $w_dy_menu + 3 + $y_pos)
-	printf "Chiffre ou [ENTER]-Exécuter"
+    gotoxy $(expr 2 + $x_pos) $(expr $w_dy_menu + 3 + $y_pos)
+    printf "Chiffre ou [ENTER]-Exécuter"
     let current_item=0
     Select selected
     gotoxy 1 15; printf "\033[0m"
@@ -368,40 +372,44 @@ menu()
     function loop_menu()
     {
         current_item=0
-	let Done=0
-	ctrl=0
-	while [ $Done -ne 1 ]
-	do
-	    read -s -n 1 clef &>/dev/null
-	    case $clef in
+    let Done=0
+    ctrl=0
+    while [ $Done -ne 1 ]
+    do
+        read -s -n 1 clef &>/dev/null
+        case $clef in
             a|A)
-	        Select normal
-		    [ $((--current_item)) ]
-		    [ $current_item -lt 0 ] && let current_item=$(expr $nbItems - 1)
-	        Select selected
-		;;
-	    b|B)
-	        Select normal
-		    [ $((++current_item)) ]
-		    [ $current_item -gt $(expr $nbItems - 1) ] && let current_item=0
-		    Select selected
-		;;
-	    [1-9])
-	        if [ $clef -le $nbItems ]; then
-	            REPONSE[0]=$clef
-		    REPONSE[1]=${item[$(expr $clef - 1)]}
-		    break;
-		fi
-		;;
-	     *)
-	        if [ -z $clef ] ; then
-	                REPONSE[0]=$(expr $current_item + 1)
-		        REPONSE[1]=${item[$current_item]}
-		    break;
-		fi
-		;;
+            Select normal
+            [ $((--current_item)) ]
+            [ $current_item -lt 0 ] && let current_item=$(expr $nbItems - 1)
+            REPONSE[0]=$(expr $current_item + 1)
+            REPONSE[1]=${item[$current_item]}
+            Select selected
+        ;;
+        b|B)
+            Select normal
+            [ $((++current_item)) ]
+            [ $current_item -gt $(expr $nbItems - 1) ] && let current_item=0
+            REPONSE[0]=$(expr $current_item + 1)
+            REPONSE[1]=${item[$current_item]}
+            Select selected
+        ;;
+        [1-9])
+            if [ $clef -le $nbItems ]; then
+                REPONSE[0]=$clef
+            REPONSE[1]=${item[$(expr $clef - 1)]}
+            break;
+        fi
+        ;;
+            *)
+            if [ -z $clef ] ; then
+                    REPONSE[0]=$(expr $current_item + 1)
+                REPONSE[1]=${item[$current_item]}
+            break;
+        fi
+        ;;
 
-	    esac
+        esac
 	done
     }
     loop_menu
@@ -420,33 +428,75 @@ function Main()
 {
     let sel=0
 
-    while [ $sel != 5 ]
+    while [ $sel != 6 ]
     do
 	TITRE="   Menu Principale:   "
 	menu Archiver Désarchiver "Réparer le bug Micro-Scolling de QT" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
 	let sel=${REPONSE[0]}
 	case $sel in
 	1)
-	    echo "Archvier..."
-
+        Clear 
+        gotoxy 1 7
+	    printf "${REPONSE[1]}"
+        gotoxy 2 10
+        printf "${Files[0]}"
+        read
 	    ;;
 	2)
-	    echo "Désarchiver"
+        Clear 
+        gotoxy 1 7
+        printf "${REPONSE[1]}"
+	    #echo "Désarchiver"
+        gotoxy 2 10
+        printf "${Files[1]}"
+        read
 
 	    ;;
 	3)
+        Clear 
+        gotoxy 1 7
 	    echo "Réparer le bug Micro-Scolling de QT"
+        gotoxy 2 10
+        printf "${Files[2]}"
+        read
 
 	    ;;
 	4)  
+        Clear 
+        gotoxy 1 7
         echo "[Auto-]Configurer le Nuage"
+        gotoxy 2 10
+        printf "${Files[3]}"
+        read
 
 	    ;;
 	5)
-        echo "Quitter"
-
-	    break
+        Clear
+        gotoxy 1 7
+        printf "${Files[4]}"
+        read
+        
 	    ;;
+	6)
+        TITRE="           Quitter"
+        question "Êtes-vous sûr de vouloir Quitter? [o/O:Oui; n/N:Non] (Defaut:Oui)" 4
+        Clear
+        if [ -z ${REPONSE[1]} ] ; then
+            Clear
+            gotoxy 1 7
+            echo "Terminé."
+            break;
+        fi
+        [ ${REPONSE[1]} == "N" ] || [ ${REPONSE[1]} == "n" ] && sel=1
+        
+        gotoxy 1 7
+        #printf "R: $sel ( ${REPONSE[1]} )\n"
+        #echo "Quitter"
+        echo "Terminé."
+        #read
+	    
+	    ;;
+
 	esac
     done
     return 0
@@ -456,5 +506,5 @@ function Main()
 #Clear
 
 Main
-clear
+#clear
 
