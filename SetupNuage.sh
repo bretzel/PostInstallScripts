@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/bin/bash
+
+
+Clear
+gotoxy 1 7
+
+
 echo "Configuration du Nuage :"
 sudo mkdir -p /Nuage/A /Nuage/B
 sudo pacman -S nfs-utils
@@ -9,3 +15,4 @@ sudo cp  /Nuage/A/Linux/Arch-Linux-Stuff/PostInstal/nfs.sh /etc/NetworkManager/d
 sudo systemctl enable NetworkManager
 sudo systemctl start NetworkManager
 
+echo "Terminé. Appuyer sur [ENTER] pour retourner au menu."

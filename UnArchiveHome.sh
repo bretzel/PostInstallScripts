@@ -19,7 +19,7 @@ H=`pwd`
 echo $H
 
 #tar xfz /Nuage/A/Linux/Arch-Linux-Stuff/PostinstallScripts/h*.gz
-ls /Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/h*.gz
+ls -l /Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/h*.gz
 read
 popd
 Clear
