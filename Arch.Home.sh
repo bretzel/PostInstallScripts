@@ -10,8 +10,8 @@ echo "Fichier finale de l'archive:$Archive"
 
 echo  "Destination finale: /Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/$Archive"
 echo "Archivage:"
-tar zcf "/Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/$Archive" .oh-my-zsh .zsh_favlist .zsh_history .zshrc .zsh-update .gitconfig .fonts .themes .icons .SpaceVim .SpaceVim.d .bash_it .bashrc 
+tar zcf "/Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/$Archive" .oh-my-zsh .zsh_favlist .zsh_history .zshrc .zsh-update .gitconfig .fonts .themes .icons .SpaceVim .SpaceVim.d .bash_it .bashrc
 
 echo "retour:"
 cd -
-
+Done "Archivage du répertoire usager terminé.\n"

@@ -1,6 +1,6 @@
 #!/bin/sh
-# (C) 2001-2018, Serge Lussier 
-PROGRAM="Scripts Post-Installation"
+# (C) 2001-2018, Serge Lussier
+PROGRAM="Scripts de configuration Bretzelus pour Arclinux"
 TITRE=""
 MESSAGE="   "
 Choix=""
@@ -9,7 +9,7 @@ Files[0]="Arch.Home.sh"
 Files[1]="UnArchiveHome.sh"
 Files[2]="FixQtMicroScrollBug.sh"
 Files[3]="SetupNuage.sh"
-Files[4]="Archive.etc.sh"      
+Files[4]="Archive.etc.sh"
 
 CSUP="A"
 CSDOWN="B"
@@ -46,8 +46,17 @@ function Erreur()
     read -n 1 -t 5 dummy
 }
 
-export -f Erreur  
+export -f Erreur
 
+function Done()
+{
+    gotoxy 1 $(expr $LINES - 5)
+    printf "$1"
+    printf "\033[0;1;5;33mAppuyer pour continuer...$CL_RESET"
+    read -n 1 -t 5 dummy
+}
+
+export -f Done
 
 # Fonction center_str:
 # Calcule la position horizontale au centre de l'ecran
@@ -58,13 +67,13 @@ export -f Erreur
 center_str()
 {
     len=0
-    p=$1 
+    p=$1
     if [ "$1" = "-v" ]; then
         len=$2
     else
         len=${#p}
     fi
-    
+
     x_pos=$(expr $(expr $COLUMNS - $len) / 2)
     if [ -z $3 ]; then
         y_pos=0
@@ -72,7 +81,7 @@ center_str()
     fi
     y_pos=$(expr $LINES - $3)
     y_pos=$(expr $y_pos / 2)
-    
+
     return $x_pos
 }
 
@@ -113,9 +122,9 @@ function Clear()
 
     longueur=$(expr $COLUMNS - 4)
     c=0
-  
+
     center_str -v $longueur
-    
+
     while [ $c -lt 6 ]
     do
        gotoxy $x_pos $(expr $c + 1)
@@ -134,15 +143,15 @@ function Clear()
     done
     printf $CL_RESET
     # Ligne d'ombrage
-    
+
     gotoxy $(expr $x_pos + 3) $(expr $c + 1)
-    
+
     echo -e "\033[0;40m${ligne:0:$(expr $longueur - 12)}"
-    
+
     # text du titre du programme:
     txt="$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
     center_str -v $(expr ${#txt} - 84)
-    
+
     gotoxy $x_pos 3
     echo -e $txt #"$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
     gotoxy 1 1
@@ -153,15 +162,15 @@ function Clear()
 question()
 {
     Clear
-    
+
     let nbQuestions=$(expr $# / 2)
-    
+
     let lenp=0
     let arg=0
     let longueur=0
     let len=0
     let pos_prompt=0
-    
+
     # Trouver la largeur :
     for par in "$@"
     do  # Arguments pairs: texte de la question
@@ -268,7 +277,7 @@ export -f question Clear center_str
 menu()
 {
     Clear
-    
+
     let nbItems=$#
     [ $nbItems -gt 9 ] && let nbItems=9
     let arg=0
@@ -280,7 +289,7 @@ menu()
 # Trouver la largeur :
     let c=0
     let i=1
-    
+
     for par in "$@"
     do
         [ $c -gt 9 ] && break
@@ -293,11 +302,11 @@ menu()
             longueur=$len
         fi
     done
-    
+
     hl="[u|U]-HAUT | [j|J]-BAS[ENTER]-Selectionner"
     let len=${#hl}
     [ $longueur -lt $len ] && let longueur=$len
-    
+
 #Obtenir la coordonée (x,y) au centre de l'écran
     let w_menu=$longueur+4
     let w_win=$w_menu+5
@@ -370,9 +379,9 @@ menu()
     function loop_menu()
     {
         current_item=0
-    let Done=0
+    let _Done=0
     ctrl=0
-    while [ $Done -ne 1 ]
+    while [ $_Done -ne 1 ]
     do
         read -s -n 1 clef &>/dev/null
         case $clef in
@@ -411,7 +420,7 @@ menu()
     }
     loop_menu
     printf "\033[0m"
-    
+
 }
 
 # Fonction AfficheTitre:
@@ -425,64 +434,62 @@ export TITRE
 Archive()
 {
     source ${Files[0]}
-    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
-    read
 }
 
 DeArchive()
 {
     source ${Files[1]}
-    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
-    read
 }
 
 
 FixQtScroll()
 {
     source ${Files[2]}
-    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
-    read
 }
 
 ConfigureCloud()
 {
     source ${Files[3]}
-    printf " Terminé. Appuyer sur [ENTER] pour retourner au menu"
-    read
 }
 
+TestSelecteur()
+{
+    source TestSelecteur.bash *.tar.gz
+}
 
 function Main()
 {
     let sel=0
 
-    while [ $sel != 6 ]
+    while [ $sel != 7 ]
     do
 	TITRE="   Menu Principale:   "
-	menu Archiver Désarchiver "Réparer le bug Micro-Scolling de QT" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
+	menu TestSelecteur Archiver Désarchiver "Réparer le bug Micro-Scolling de QT" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
 	let sel=${REPONSE[0]}
 	case $sel in
-	1)    
-	    Archive
-        ;;
+  1)
+      TestSelecteur
+      ;;
 	2)
-        DeArchive
-	    ;;
+	    Archive
+      ;;
 	3)
-        FixQtScroll
+      DeArchive
 	    ;;
-	4)  
-        ConfigureCloud
-
+	4)
+      FixQtScroll
 	    ;;
 	5)
+      ConfigureCloud
+	    ;;
+	6)
         Clear
         gotoxy 1 7
         printf "${Files[4]} : Pas encore implémenté"
         read
-        
+
 	    ;;
-	6)
+	7)
         TITRE="           Quitter"
         question "Êtes-vous sûr de vouloir Quitter? [o/O:Oui; n/N:Non] (Defaut:Oui)" 4
         Clear
@@ -493,13 +500,13 @@ function Main()
             break;
         fi
         [ ${REPONSE[1]} == "N" ] || [ ${REPONSE[1]} == "n" ] && sel=1
-        
+
         gotoxy 1 7
         #printf "R: $sel ( ${REPONSE[1]} )\n"
         #echo "Quitter"
         echo "Terminé."
         #read
-	    
+
 	    ;;
 
 	esac
@@ -512,4 +519,3 @@ function Main()
 
 Main
 #clear
-
