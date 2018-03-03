@@ -6,8 +6,19 @@ gotoxy 1 7
 
 
 echo "Configuration du Nuage :"
+echo "os-release:"
+source /etc/os-release
+
+DistribCMD["Arch Linux"]="sudo pacman --noconfirm -S nfs-utils"
+DistribCMD[1]="Debian"
+DistribCMD[2]="Ubuntu"
+DistribCMD[3]="Fedora"
+DistribCMD[4]="Fedora"
+
+echo "Répertoire /Nuage :"
 [ -d /Nuage ] || sudo mkdir -p /Nuage/A /Nuage/B
-echo " Vérification du package nfs :"
+echo "Vérification du package nfs :"
+
 
 #Ubuntu* Debian*
 # dpkg -s nfs-client 2>/dev/null >/dev/null || sudo apt-get -y install nfs-client
@@ -22,7 +33,7 @@ echo " Vérification du package nfs :"
 
 # Archlinux:
 x=`pacman -Qs nfs-utils`
-[ -z "$x" ] && sudo pacman -S nfs-utils || printf " nfs-utils est déjà installé :)\n\n"
+[ -z "$x" ] && ${DistribCMD[$Name]} || printf " nfs-utils est déjà installé :)\n\n"
 
 sudo systemctl enable NetworkManager
 sudo systemctl start NetworkManager

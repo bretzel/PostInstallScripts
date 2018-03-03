@@ -238,7 +238,8 @@ question()
     do
         gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
         printf $IN_FIELD
-        read REPONSE[$c]
+        read -t 8 REPONSE[$c]
+        [ -z ${REPONSE[$c]}] && break;
         [ $((++c)) ]
     done
     printf "\033[0m\n"

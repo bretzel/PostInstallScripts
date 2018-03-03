@@ -19,9 +19,9 @@ done
 printf "$c\n"
 N=$c
 let c=0
-printf "Debug: N=$N\n"
-printf " args: $*"
-read
+#printf "Debug: N=$N\n"
+#printf " args: $*"
+#read
 
 while [ $c -lt ${N} ]
 do
@@ -34,7 +34,7 @@ done
 
 [ $c -gt 7 ] && Height=7 || Height=$c
 let x=0
-printf "Width: $Width; Height: $Height\n"
+#printf "Width: $Width; Height: $Height\n"
 
 while [ $x -lt $Height ]
 do
@@ -43,10 +43,9 @@ do
 done
 
 while [ ${REPONSE[1]} != "Retour" ]
-  TITRE="Selecteur d'archive:"
 do
   menu ${items[*]} Retour
-  [ ${REPONSE[1]} == "Retour" ] && return
+  [ ${REPONSE[1]} == "Retour" ] && break
 done
 
 
