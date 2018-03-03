@@ -31,6 +31,16 @@ if [ -z $COLUMNS ] ; then
     export COLUMNS=80 LINES=25
 fi
 
+Status()
+{
+    let x = $(expr $COLUMNS - 5)
+    gotoxy 1
+    printf "\033[1;37m$1"
+    gotoxy x
+    [ $2 == "NO" ] && printf "\033[1;37m\[\033[1;31mNO\033[1;37m\]\n"
+    [ $2 == "OK" ] && printf "\033[1;37m\[\033[1;32mNO\033[1;37m\]\n"
+}
+
 x_pos=0
 y_pos=0
 #export LINES COLUMNS

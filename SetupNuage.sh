@@ -8,14 +8,16 @@ gotoxy 1 7
 echo "Configuration du Nuage :"
 echo "os-release:"
 source /etc/os-release
+echo " Nom: $Name\n"
 
-DistribCMD["Arch Linux"]="sudo pacman --noconfirm -S nfs-utils"
-DistribCMD[1]="Debian"
-DistribCMD[2]="Ubuntu"
-DistribCMD[3]="Fedora"
-DistribCMD[4]="Fedora"
 
-echo "Répertoire /Nuage :"
+#DistribCMD["Arch Linux"]="sudo pacman --noconfirm -S nfs-utils"
+#DistribCMD[1]="Debian"
+#DistribCMD[2]="Ubuntu"
+#DistribCMD[3]="Fedora"
+#DistribCMD[4]="Fedora"
+
+echo "Répertoire du montage /Nuage :"
 [ -d /Nuage ] || sudo mkdir -p /Nuage/A /Nuage/B
 echo "Vérification du package nfs :"
 
@@ -28,22 +30,53 @@ echo "Vérification du package nfs :"
 #then
 #   echo " nfs est installé"
 #else
-#    sudo yum install nfs-utils
+##    sudo yum install nfs-utils
 #fi
 
 # Archlinux:
 x=`pacman -Qs nfs-utils`
-[ -z "$x" ] && ${DistribCMD[$Name]} || printf " nfs-utils est déjà installé :)\n\n"
+[ -z "$x" ] && sudo pacman --noconfirm -S nfs-utils || printf " Le support nfs est déjà installé :)\n\n"
 
-sudo systemctl enable NetworkManager
-sudo systemctl start NetworkManager
+question "Le service NetworkManager doit-il être activé [O;N]? (Non par déf.) " 2
+if [ ${REPONSE[0]} == "O" ]; then
+  sudo systemctl enable NetworkManager
+  sudo systemctl start NetworkManager
+  printf "Services actives. - "
+  printf "Delais intentionnel de 2 secondes...\n"
+  sleep 2
+fi
 
-printf " Delais intentionnel de 2 secondes...\n"
-sleep 2
+printf "Connexion au Nuage:\n"
+sudo mount -t nfs 192.168.2.62:/nfs/bretzelus /Nuage/A 2>/dev/null
+if [ $? == 0 ]; then
+   printf " Nuage/A monté.\n"
+   sudo mount -t nfs 192.168.2.62:/nfs/Public /Nuage/B
+else
+  Erreur " connexion NFS au Nuage avortée \n"
+  return 1
+fi
 
-sudo mount -t nfs 192.168.2.62:/nfs/bretzelus /Nuage/A
-sudo mount -t nfs 192.168.2.62:/nfs/Public /Nuage/B
-sudo cp  /Nuage/A/Linux/Arch-Linux-Stuff/PostInstal/nfs.sh /etc/NetworkManager/dispatcher.d
-sudo echo "192.168.2.62       WD.Nuage        Nuage" >> /etc/hosts
+printf "Copie du script de connexion dans etc:\n"
+sudo cp  nfs.sh /etc/NetworkManager/dispatcher.d/
+if [ $? == 0 ]; then
+  echo " Copié.\n"
+else
+  Erreur " Copie de nfs.sh avortée...Appuyer sur CTRL-C pour avorter le script."
+  return 1
+fi
 
-echo "Terminé. Appuyer sur [ENTER] pour retourner au menu."
+printf " hosts: \n"
+x=`grep "WD.Nuage" /etc/hosts`
+if [ ${#x} -gt 0 ] ; then
+  printf " le fichier hosts est déjà renseigné sur Nuage... \n"
+else
+  printf " Renseignement du Nuage dans le fichier hosts:\n"
+  cp /etc/hosts .
+  echo "192.168.2.62       WD.Nuage        Nuage" >> hosts
+  sudo cp hosts /etc/hosts
+fi
+
+printf " Test: ping Nuage:"
+ping -c 3 Nuage
+
+Done "Terminé. Appuyer sur [ENTER] pour retourner au menu."

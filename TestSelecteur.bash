@@ -10,6 +10,12 @@ let Height=0
 let Width=0
 let items=0
 let N=0
+
+Status " Testing ... " "OK"
+Status " Testing ... " "NO"
+read
+Clear
+
 for F in "$@"
 do
     FILES[$c]=$F
