@@ -43,7 +43,7 @@ function Erreur()
     gotoxy 1 $(expr $LINES - 5)
     printf "$1"
     printf "\033[0;1;5;33mAppuyer pour continuer...$CL_RESET"
-    read -n 1 -t 5 dummy
+    read -n 1 -t 10 dummy
 }
 
 export -f Erreur
@@ -53,7 +53,7 @@ function Done()
     gotoxy 1 $(expr $LINES - 5)
     printf "$1"
     printf "\033[0;1;5;33mAppuyer pour continuer...$CL_RESET"
-    read -n 1 -t 5 dummy
+    read -n 1 -t 10 dummy
 }
 
 export -f Done
@@ -84,22 +84,6 @@ center_str()
 
     return $x_pos
 }
-
-center_x()
-{
-   x_pos=$(expr $(expr $COLUMNS - $1) / 2)
-   #echo "x_pox = $x_pos ($1)"
-   return $x_pos;
-}
-
-percent()
-{
-    return 0
-}
-
-
-export -f center_x
-
 
 function  gotoxy()
 {

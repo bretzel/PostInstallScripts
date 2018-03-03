@@ -9,4 +9,3 @@ then
     umount /Nuage/A
     umount /Nuage/B
 fi
-
