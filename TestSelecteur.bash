@@ -11,9 +11,6 @@ let Width=0
 let items=0
 let N=0
 
-Status " Testing ... " "OK"
-Status " Testing ... " "NO"
-read
 Clear
 
 for F in "$@"
@@ -22,7 +19,11 @@ do
     printf "$F\n"
     [ $((++c)) ]
 done
-printf "$c\n"
+
+Status " $c fichiers listé." "OK"
+read -t 10
+
+#printf "$c\n"
 N=$c
 let c=0
 #printf "Debug: N=$N\n"

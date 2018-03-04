@@ -33,12 +33,12 @@ fi
 
 Status()
 {
-    let x = $(expr $COLUMNS - 5)
-    gotoxy 1
+    let x=$(expr $COLUMNS - 5)
+    gotoxy 1 7
     printf "\033[1;37m$1"
-    gotoxy x
-    [ $2 == "NO" ] && printf "\033[1;37m\[\033[1;31mNO\033[1;37m\]\n"
-    [ $2 == "OK" ] && printf "\033[1;37m\[\033[1;32mNO\033[1;37m\]\n"
+    gotoxy $x 7
+    [ $2 == "NO" ] && printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n"
+    [ $2 == "OK" ] && printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n"
 }
 
 x_pos=0
@@ -98,7 +98,7 @@ center_str()
 function  gotoxy()
 {
   if [ $# -lt 2 ];then
-      printf "\033[$1f"
+      printf "\033[;$1f"
   elif [ $# -eq 2 ] ; then
       printf "\033[$2;$1f"
   fi
