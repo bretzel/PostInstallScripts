@@ -4,7 +4,7 @@
 Clear
 
 #TITRE='Sélecteur de Fichier(s):'
-let FILES=0
+unset FILES
 let c=0
 let Height=0
 let Width=0
@@ -16,26 +16,24 @@ Clear
 for F in "$@"
 do
     FILES[$c]=$F
-    printf "$F\n"
+    #printf "$F\n"
     [ $((++c)) ]
 done
 
-Status " $c fichiers listé." "OK"
-read -t 10
 
-#printf "$c\n"
+
 N=$c
-let c=0
+c=0
 #printf "Debug: N=$N\n"
 #printf " args: $*"
 #read
 
+#unset items
 while [ $c -lt ${N} ]
 do
     #printf "${FILES[$c]}\n"
     let l=${#FILES[$c]}
     [ $Width -lt $l ] && Width=$l
-    unset "items[$c]"
     [ $((++c)) ]
 done
 
@@ -43,18 +41,19 @@ done
 let x=0
 #printf "Width: $Width; Height: $Height\n"
 
-while [ $x -lt $Height ]
-do
-    items[$x]=${FILES[$x]}
-    [ $((++x)) ]
-done
+#while [ $x -lt $Height ]
+#do
+#    items[$x]=${FILES[$x]}
+#    [ $((++x)) ]
+#done
 
 while [ ${REPONSE[1]} != "Retour" ]
 do
-  menu ${items[*]} Retour
+  menu ${FILES[*]} Retour
   [ ${REPONSE[1]} == "Retour" ] && break
 done
 
 
 
-Done "Test terminé."
+Status "Test terminé. Appuyer sur [ENTER] pour retourner au menu précedant..." "OK"
+read -t 5

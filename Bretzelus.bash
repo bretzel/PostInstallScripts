@@ -34,9 +34,10 @@ fi
 Status()
 {
     let x=$(expr $COLUMNS - 5)
-    gotoxy 1 7
+    let y=$(expr $LINES - 1)
+    gotoxy 1 $y
     printf "\033[1;37m$1"
-    gotoxy $x 7
+    gotoxy $x $y
     [ $2 == "NO" ] && printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n"
     [ $2 == "OK" ] && printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n"
 }
