@@ -22,6 +22,4 @@ echo $H
 ls -l /Nuage/A/Linux/Arch-Linux-Stuff/PostInstallScripts/h*.gz
 read
 popd
-Clear
-
-
+Done "Simulation terminée."

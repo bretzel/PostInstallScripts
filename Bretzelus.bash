@@ -62,8 +62,7 @@ export -f Erreur
 function Done()
 {
     gotoxy 1 $(expr $LINES - 5)
-    printf "$1"
-    printf "\033[0;1;5;33mAppuyer pour continuer...$CL_RESET"
+    Status "$1 - \033[0;1;5;33mAppuyer pour continuer...$CL_RESET" "OK"
     read -n 1 -t 10 dummy
 }
 
