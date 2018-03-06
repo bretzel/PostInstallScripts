@@ -1,0 +1,112 @@
+#!/bin/sh
+
+$AddUser="useradd"
+
+newuser()
+{
+    Clear
+    TITRE="Creation d'un nouvel usager:"
+    question "Usager standard:[O/n]:" 1 "Nom de l'usager  :" 20 "\"home directory\" (optionel):" 40 "Shell: ["$CL_QUESTION_SEL"B$CL_QUESTION]ash; ["$CL_QUESTION_SEL"Z$CL_QUESTION]sh ? " 1
+    if [ ${REPONSE[0]} == "o" ] || [ ${REPONSE[0]} == "O" ]; then
+        _USRTYPE="wheel,storage,audio,video,power"
+    else
+        _USRTYPE="wheel"
+    fi
+        
+    _USER=${REPONSE[2]}
+    [ -z $_USER ] && return 1
+    _HOME=${REPONSE[3]}
+    
+    [ -z "$_HOME" ] && _HOME="/home/$_USER"
+    
+    question " L'usager $_USER sera créé sous: $_HOME. Coorecte ? [o/N]" 2
+    read -t 10 Yes
+    
+    
+    if ! grep -w ^$_USER /etc/passwd &>/dev/null; then [ ! -d $_HOME ] && mkdir -p $_HOME
+    
+    if ! /usr/sbin/useradd -d "$_HOME/$_USER" -g users -G "$USRTYPE"  # -Group, -groups -s shell/path ?????
+             #&>/dev/null ;
+	 then
+             Erreur "$CL_ERR -- Erreur:... Impossible de creer le compte utilisateur $CL_DTA$_USER$CL_RESET!\n   "
+	     return 1
+	fi
+        Erreur "\033[0mCompte-usager $CL_DTA$_USER \033[0mcree avec succes!\n"
+	UPDATEUSR="o"
+        return 0
+    else
+        Erreur "\033[0;1;31mErreur: Le compte $CL_DTA$_USER $CL_ERR existe deja!\033[0m\n"
+        return 1
+    fi
+}
+_USER=""
+_R=""
+
+_deleteuser()
+{
+   if ! /usr/sbin/userdel $1 $2 &>/dev/null; then
+       Erreur "$CL_ERR --- Erreur: Destruction du compte $CL_DTA$_USER $CL_ERR echoue...\033[0m"
+       return 1
+   else
+       Erreur "\033[0m Compte $CL_DTA$_USER \033[0mdetruit"
+   fi 
+   UPDATEUSR="o"
+}
+
+deluser()
+{
+    Clear
+#    list_users 18 passwd
+    TITRE="Detruire un usager:\n"
+    question "Nom de l'usager  :" 20 "Detruire son repertoire[o/n] :" 1
+    _USER=${REPONSE[1]}
+    _R=${REPONSE[2]}
+    [ -z $_USER ] && return 1
+    if ! grep -w ^$_USER /etc/passwd &>/dev/null;then
+        Erreur "$CL_ERR --- Erreur: l'usager $CL_DTA$_USER $CL_ERR n'existe pas!\033[0m\n"
+        return 1
+    fi
+    if [ $_R = "o" ];then  
+       _deleteuser -r $_USER 
+    else  
+       _deleteuser $_USER 
+    fi
+    UPDATEUSR="o"
+    return  0
+}
+    
+chpass()
+{
+    Clear
+    TITRE="Changer le mot de passe d'un utilisateur:"
+    question "Nom de l'usager   :" 20 "Nouveau mot de passe:" 16
+    _USER=${REPONSE[1]}
+    [ -z $_USER ] && return 1
+    if ! grep -w ^$_USER /etc/passwd &>/dev/null;then 
+        Erreur "$CL_ERR -- Erreur: l'usager $_CL_DTA $_USER $CL_ERR n'existe pas!\033[0m\n"
+        return 1
+    fi
+    if ! echo ${REPONSE[2]} | passwd $_USER --stdin &>/dev/null ; then
+       Erreur "$CL_ERR -- Erreur: changement de mot passe echoue..."
+    else
+       Erreur "\033[0mMot de passe pour $CL_DTA$_USER \033[0mchange avec success\n"
+    fi
+    return 0
+}
+
+
+case $1 in
+   "new")
+       newuser
+       ;;
+   "del")
+       deluser
+       ;;
+   "chpass")
+       chpass
+       ;;
+esac
+
+
+    
+    

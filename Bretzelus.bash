@@ -21,10 +21,12 @@ CL_MENUNORMAL="\033[44;1;33m"
 CL_MENUSELECT="\033[42;0;33m"
 CL_WINBCK="\033[47;1;47m"
 CL_RESET="\033[0m"
+CL_QUESTION="\033[0;30;46m"
+CL_QUESTION_SEL="\033[0;34;46m"
 
 USERNAME=`id -u -n`
 
-export IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET
+export IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL
 export REPONSE=" "
 
 if [ -z $COLUMNS ] ; then
@@ -131,9 +133,9 @@ function Clear()
         gotoxy $(expr $x_pos + 2) $(expr $c + 1)
         printf "$IN_FIELD${ligne:0:$(expr $longueur - 12)}"
         if [ $c -gt 1 ]; then
-	    printf "\033[0;40m "
-	fi
-	[ $((c++)) ]
+        printf "\033[0;40m "
+    fi
+    [ $((c++)) ]
     done
     printf $CL_RESET
     # Ligne d'ombrage
@@ -169,18 +171,18 @@ question()
     for par in "$@"
     do  # Arguments pairs: texte de la question
         if [ $arg -eq 0 ]; then
-	   let len=${#par}
-	   if [ $pos_prompt -lt $len ]; then
-	       pos_prompt=$(expr $len + 1)
-	   fi
-	   let arg=1
+        let len=${#par}
+        if [ $pos_prompt -lt $len ]; then
+            pos_prompt=$(expr $len + 1)
+        fi
+        let arg=1
 
-	else # Arguments impairs: longueur de la zone de saisie
-	   let arg=0
- 	   if [ $lenp -lt $par ]; then
-	      let lenp=$par
-	   fi
-	fi
+    else # Arguments impairs: longueur de la zone de saisie
+        let arg=0
+        if [ $lenp -lt $par ]; then
+            let lenp=$par
+        fi
+    fi
     done
     let longueur=$pos_prompt+$lenp
 
@@ -196,8 +198,8 @@ question()
     while [ $c -lt $nblignes ]
     do
         gotoxy $x_pos $(expr $c + $y_pos)
-	printf "\033[0;47m${ligne:0:$(expr $longueur + 5)}\n"
-	[ $((++c)) ]
+    printf "\033[0;47m${ligne:0:$(expr $longueur + 5)}\n"
+    [ $((++c)) ]
     done
     gotoxy $x_pos $y_pos
     printf "\033[30m$TITRE\n"
@@ -206,13 +208,13 @@ question()
     # afficher le fond de la zone de question en CYAN
     while [ $c -le $nbQuestions ]
     do
-	gotoxy $(expr $x_pos + 2)  $(expr $c + $y_pos)
-	printf "\033[0;46m${ligne:0:$(expr $longueur + 1)}"
-	[ $((++c)) ]
-	if [  $c -eq 2 ]; then
-	    continue
-	fi
-	printf "\033[0m "
+    gotoxy $(expr $x_pos + 2)  $(expr $c + $y_pos)
+    printf "\033[0;46m${ligne:0:$(expr $longueur + 1)}"
+    [ $((++c)) ]
+    if [  $c -eq 2 ]; then
+        continue
+    fi
+    printf "\033[0m "
     done
     # Ligne noir pour effet d'ombrage:
     gotoxy $(expr $x_pos + 3)  $(expr $c + $y_pos)
@@ -224,19 +226,19 @@ question()
     let arg=0
     for par in "$@"
     do
-	if [ $arg -eq 0 ];then
-	   # Argument est le texte du prompt:
-	   pos=$(expr $x_pos + $pos_prompt - ${#par} + 2)
-	   gotoxy $pos $(expr $c + $y_pos)
-	   printf "\033[0;30;46m$par"
-	   arg=1
-	 else
-	   arg=0
-	   gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
-	   printf "$IN_FIELD${ligne:0:$par}\n"
-	   field_len[$c]=$par
-	   [ $((++c)) ]
-	fi
+    if [ $arg -eq 0 ];then
+        # Argument est le texte du prompt:
+        pos=$(expr $x_pos + $pos_prompt - ${#par} + 2)
+        gotoxy $pos $(expr $c + $y_pos)
+        printf "\033[0;30;46m$par"
+        arg=1
+        else
+        arg=0
+        gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
+        printf "$IN_FIELD${ligne:0:$par}\n"
+        field_len[$c]=$par
+        [ $((++c)) ]
+    fi
     done
     copyright="(C)2001-$(date '+%Y'), Serge Lussier"
     len=${#copyright}
@@ -248,11 +250,11 @@ question()
     do
         gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
         printf $IN_FIELD
-        read -t 8 REPONSE[$c]
-        [ -z ${REPONSE[$c]}] && break;
+        read -t 30 REPONSE[$c]
+        #[ -z ${REPONSE[$c]} ] && break;
         [ $((++c)) ]
     done
-    printf "\033[0m\n"
+    printf "\033[0m \n"
  }
 
 export -f question Clear center_str
@@ -411,7 +413,7 @@ menu()
         ;;
 
         esac
-	done
+    done
     }
     loop_menu
     printf "\033[0m"
@@ -426,12 +428,12 @@ export gotoxy question Clear
 export TITRE
 
 
-Archive()
+Archiver()
 {
     source ${Files[0]}
 }
 
-DeArchive()
+DeArchiver()
 {
     source ${Files[1]}
 }
@@ -458,33 +460,33 @@ function Main()
 
     while [ $sel != 7 ]
     do
-	TITRE="   Menu Principale:   "
-	menu TestSelecteur Archiver Désarchiver "Réparer le bug Micro-Scolling de QT" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
-	let sel=${REPONSE[0]}
-	case $sel in
-  1)
-      TestSelecteur
-      ;;
-	2)
-	    Archive
-      ;;
-	3)
-      DeArchive
-	    ;;
-	4)
-      FixQtScroll
-	    ;;
-	5)
-      ConfigureCloud
-	    ;;
-	6)
+    TITRE="   Menu Principale:   "
+    menu TestSelecteur Archiver Désarchiver "Micro-Scolling de QT sous Plasma" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
+    let sel=${REPONSE[0]}
+    case $sel in
+    1)
+        TestSelecteur
+        ;;
+    2)
+        Archiver
+        ;;
+    3)
+        DeArchiver
+        ;;
+    4)
+        FixQtScroll
+        ;;
+    5)
+        ConfigureCloud
+        ;;
+    6)
         Clear
         gotoxy 1 7
         printf "${Files[4]} : Pas encore implémenté"
         read
 
-	    ;;
-	7)
+        ;;
+    7)
         TITRE="           Quitter"
         question "Êtes-vous sûr de vouloir Quitter? [o/O:Oui; n/N:Non] (Defaut:Oui)" 4
         Clear
@@ -502,9 +504,9 @@ function Main()
         echo "Terminé."
         #read
 
-	    ;;
+        ;;
 
-	esac
+    esac
     done
     return 0
 }
