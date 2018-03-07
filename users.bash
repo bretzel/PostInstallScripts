@@ -5,14 +5,12 @@
 _USER=""
 _R=""
 
-
-
 function InstallZSH()
 {
-    if ! pacman -Qs zsh; then
+    if ! pacman -Qs zsh >/dev/null; then
         Clear
         gotoxy 1 7
-        pacman -S zsh zsh-{completions,doc,lovers,syntax-highlighting,theme-powerlevel9k} zshdb --noconfirm
+        pacman -S zsh zsh-{completions,doc,lovers,syntax-highlighting,theme-powerlevel9k} zshdb --noconfirm >/dev/null
         Clear
     fi
 }
@@ -20,59 +18,88 @@ function InstallZSH()
 function InstallExtraBash()
 {
 
-    if ! pacman -Qs bash-completion; then
+    if ! pacman -Qs bash-completion >/dev/null; then
         Clear
         gotoxy 1 7
-        pacman  -S bash-completion --noconfirm
+        pacman  -S bash-completion --noconfirm >/dev/null
         Clear
     fi
 }
+
 
 newuser()
 {
     Clear
     TITRE="Création d'un nouvel usager:"
-    $HOME_DIR_SWITCH="-m"
-    $SHELL="/bin/bash"
+    HOME_DIR_SWITCH="-m"
+    _SHELL="/bin/bash"
     
-    question "Usager standard:[O/n]:" 1 "Nom de l'usager  :" 20 "\"Répertoire de base\" (optionel):" 40 "Shell: ["$CL_QUESTION_SEL"B$CL_QUESTION]ash;  ["$CL_QUESTION_SEL"Z$CL_QUESTION]sh ? " 1
-    if [ ${REPONSE[0]} == "o" ] || [ ${REPONSE[0]} == "O" ]; then
-        _USRTYPE="wheel,storage,audio,video,power"
-    else
+    question "Usager standard:[O/n]:" 2 "Nom de l'usager  :" 20 "\"Répertoire de base\" (optionel):" 40 "Shell: [B]ash;  [Z]sh ? " 2
+    case ${REPONSE[1]} in
+    [oO])
         _USRTYPE="wheel"
-    fi
-    
-    _USER=${REPONSE[1]}
+        ;;
+    [nN])
+        _USRTYPE="wheel,storage,audio,video,power,adm"
+        ;;
+    *)
+        _USRTYPE="wheel"
+        ;;
+    esac
+        
+    _USER=${REPONSE[2]}
     if [ -z $_USER ]; then 
         Done " Création d'un usager annulée."
         return 1
     fi
     
-    HOME_BASE=${REPONSE[2]}
+    HOME_BASE=${REPONSE[3]}
     
-    [ -n "$HOME_BASE" ] && $HOME_DIR_SWITCH="-m -b $HOME_BASE"
+    [ -n "$HOME_BASE" ] && HOME_DIR_SWITCH="-m -b $HOME_BASE"
     
-    question " L'usager $_USER sera créé sous: $HOME_DIR_SWITCH/$_USER. Correcte ? [O/n]" 2
-    if [ ${REPONSE[0]} == "N" ] || [  ${REPONSE[0]} == "n" ]; then 
+    question " L'usager $_USER sera créé. Correcte ? [O/n]" 1
+    if [ -z ${REPONSE[1]} ] 
+    then
+        echo ""
+    elif [ ${REPONSE[1]} == "n" ] || [ ${REPONSE[1]} == "N" ] 
+    then 
         Done " Création d'un usager annulée."
         return 1
     fi
     
-    case ${REPONSE[4]}
-    "B")
-    "b")
-        $_SHELL="/bin/bash"
-        InstallExtraBash
-        ;;
-    "Z")
-    "z")
-        $_SHELL="/bin/zsh"
+    
+    case ${REPONSE[4]} in
+    [bB])
+#         _SHELL="/bin/bash"
+         InstallExtraBash
+       ;;
+    [zZ])
+#        _SHELL="/bin/bash"
         InstallZSH
         ;;
+    *)
+#        _SHELL="/bin/bash"
+        InstallExtraBash
+        ;;
+    esac
+    
+    #Done " Debug -- Shell: $_SHELL, Location switch: $HOME_DIR_SWITCH, User: $_USER, Admin: $_USRTYPE"
+    #return 1
+    
+    if [ -n $HOME_BASE ] 
+    then
+        if ! -d $HOME_BASE
+        then
+            if ! mkdir $HOME_BASE; then
+                Erreur " Erreur lors de la tentative de créer le répretoire $HOME_BASE."
+                return 1
+            fi
+        fi
+    fi
     
     if ! grep -w ^$_USER /etc/passwd &>/dev/null; then 
         #[ ! -d $_HOME ] && mkdir -p $_HOME
-        if ! /usr/sbin/useradd "$HOME_DIR_SWITCH"  -g users -G "$USRTYPE" -s $_SEHLL $_USER; then
+        if ! /usr/sbin/useradd $HOME_DIR_SWITCH  -g users -G $_USRTYPE -s $_SHELL $_USER; then
             Erreur "$CL_ERR -- Erreur:... Impossible de créer le compte utilisateur $CL_DTA$_USER$CL_RESET!\n   "
             return 1
         fi
@@ -146,6 +173,7 @@ chpass()
 execute()
 {
     #Menu Utilisateurs:
+
     REPONSE[0]=0
     while [ ${REPONSE[0]} != "4" ]
     do

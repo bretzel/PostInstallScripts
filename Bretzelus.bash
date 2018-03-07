@@ -250,6 +250,7 @@ question()
     do
         gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
         printf $IN_FIELD
+        REPONSE[$c]=""
         read -t 30 REPONSE[$c]
         #[ -z ${REPONSE[$c]} ] && break;
         [ $((++c)) ]
@@ -497,7 +498,7 @@ function Main()
         ;;
     8)
         TITRE="           Quitter"
-        question "Êtes-vous sûr de vouloir Quitter? [o/O:Oui; n/N:Non] (Defaut:Oui)" 4
+        question "Êtes-vous sûr de vouloir Quitter? [n/N:Non] (Defaut:Oui)" 4
         Clear
         if [ -z ${REPONSE[1]} ] ; then
             Clear
