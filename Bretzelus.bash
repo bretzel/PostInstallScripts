@@ -376,44 +376,43 @@ menu()
     function loop_menu()
     {
         current_item=0
-    let _Done=0
-    ctrl=0
-    while [ $_Done -ne 1 ]
-    do
-        read -s -n 1 clef &>/dev/null
-        case $clef in
-            a|A)
-            Select normal
-            [ $((--current_item)) ]
-            [ $current_item -lt 0 ] && let current_item=$(expr $nbItems - 1)
-            REPONSE[0]=$(expr $current_item + 1)
-            REPONSE[1]=${item[$current_item]}
-            Select selected
-        ;;
-        b|B)
-            Select normal
-            [ $((++current_item)) ]
-            [ $current_item -gt $(expr $nbItems - 1) ] && let current_item=0
-            REPONSE[0]=$(expr $current_item + 1)
-            REPONSE[1]=${item[$current_item]}
-            Select selected
-        ;;
-
-        [1-9])
-            if [ $clef -le $nbItems ]; then REPONSE[0]=$clef
-            REPONSE[1]=${item[$(expr $clef - 1)]}
-            break;
-        fi
-        ;;
-            *)
-            if [ -z $clef ] ; then REPONSE[0]=$(expr $current_item + 1)
+        let _Done=0
+        ctrl=0
+        while [ $_Done -ne 1 ]
+        do
+            read -s -n 1 clef &>/dev/null
+            case $clef in
+                a|A)
+                Select normal
+                [ $((--current_item)) ]
+                [ $current_item -lt 0 ] && let current_item=$(expr $nbItems - 1)
+                REPONSE[0]=$(expr $current_item + 1)
                 REPONSE[1]=${item[$current_item]}
-            break;
-        fi
-        ;;
+                Select selected
+            ;;
+            b|B)
+                Select normal
+                [ $((++current_item)) ]
+                [ $current_item -gt $(expr $nbItems - 1) ] && let current_item=0
+                REPONSE[0]=$(expr $current_item + 1)
+                REPONSE[1]=${item[$current_item]}
+                Select selected
+            ;;
 
-        esac
-    done
+            [1-9])
+                if [ $clef -le $nbItems ]; then REPONSE[0]=$clef
+                REPONSE[1]=${item[$(expr $clef - 1)]}
+                break;
+            fi
+            ;;
+                *)
+                if [ -z $clef ] ; then REPONSE[0]=$(expr $current_item + 1)
+                REPONSE[1]=${item[$current_item]}
+                break;
+            fi
+            ;;
+            esac
+        done
     }
     loop_menu
     printf "\033[0m"
@@ -454,15 +453,23 @@ TestSelecteur()
     source TestSelecteur.bash *.tar.gz
 }
 
+
+function Usagers()
+{
+    source users.bash
+}
+
+
 function Main()
 {
     let sel=0
 
-    while [ $sel != 7 ]
+    while [ $sel != 8 ]
     do
     TITRE="   Menu Principale:   "
-    menu TestSelecteur Archiver Désarchiver "Micro-Scolling de QT sous Plasma" "Configurer le Nuage NFS" "Sauvegarder /etc" Quitter
-    let sel=${REPONSE[0]}
+    menu TestSelecteur Archiver Désarchiver "Micro-Scolling de QT sous Plasma" "Configurer le Nuage NFS" "Sauvegarder /etc" "Gestion Usagers" Quitter
+    sel=${REPONSE[0]}
+    
     case $sel in
     1)
         TestSelecteur
@@ -484,9 +491,11 @@ function Main()
         gotoxy 1 7
         printf "${Files[4]} : Pas encore implémenté"
         read
-
         ;;
     7)
+        Usagers
+        ;;
+    8)
         TITRE="           Quitter"
         question "Êtes-vous sûr de vouloir Quitter? [o/O:Oui; n/N:Non] (Defaut:Oui)" 4
         Clear
@@ -501,9 +510,7 @@ function Main()
         gotoxy 1 7
         #printf "R: $sel ( ${REPONSE[1]} )\n"
         #echo "Quitter"
-        echo "Terminé."
-        #read
-
+        Done "Terminé. (C) 2001,2018 bretzelus"
         ;;
 
     esac
