@@ -34,7 +34,7 @@ newuser()
     HOME_DIR_SWITCH="-m"
     _SHELL="/bin/bash"
     
-    question "Usager standard:[O/n]:" 2 "Nom de l'usager  :" 20 "\"Répertoire de base\" (optionel):" 40 "Shell: [B]ash;  [Z]sh ? " 2
+    question "Usager standard:[O/n]:" 2 "Nom de l'usager  :" 20 "\"Répertoire de base\" (optionel, sans le '/'):" 40 "Shell: [B]ash;  [Z]sh ? " 2
     case ${REPONSE[1]} in
     [oO])
         _USRTYPE="wheel"
@@ -55,7 +55,7 @@ newuser()
     
     HOME_BASE=${REPONSE[3]}
     
-    [ -n "$HOME_BASE" ] && HOME_DIR_SWITCH="-m -b $HOME_BASE"
+    [ -n "$HOME_BASE" ] && HOME_DIR_SWITCH="-m -b /$HOME_BASE"
     
     question " L'usager $_USER sera créé. Correcte ? [O/n]" 1
     if [ -z ${REPONSE[1]} ] 
@@ -74,7 +74,7 @@ newuser()
          InstallExtraBash
        ;;
     [zZ])
-#        _SHELL="/bin/bash"
+        _SHELL="/bin/zsh"
         InstallZSH
         ;;
     *)
@@ -83,17 +83,18 @@ newuser()
         ;;
     esac
     
-    #Done " Debug -- Shell: $_SHELL, Location switch: $HOME_DIR_SWITCH, User: $_USER, Admin: $_USRTYPE"
-    #return 1
+#     Done " Debug -- Shell: $_SHELL, Location switch: $HOME_DIR_SWITCH, User: $_USER, Admin: $_USRTYPE"
+#     return 1
     
     if [ -n $HOME_BASE ] 
     then
-        if ! -d $HOME_BASE
+        if [ ! -d /$HOME_BASE ]
         then
-            if ! mkdir $HOME_BASE; then
-                Erreur " Erreur lors de la tentative de créer le répretoire $HOME_BASE."
+            if ! mkdir /$HOME_BASE; then
+                Erreur " Erreur lors de la tentative de créer le répretoire /$HOME_BASE."
                 return 1
             fi
+            Done " Le répertoire spécifique $CL_DTA$HOME_BASE$CL_RESET a été créé."
         fi
     fi
     
@@ -133,7 +134,7 @@ deluser()
     Clear
 #    list_users 18 passwd
     TITRE="Détruire un usager:\n"
-    question "Nom de l'usager  :" 20 "Detruire son répertoire[o/n] :" 1
+    question "Nom de l'usager  :" 20 "Detruire son répertoire[o/N] :" 1
     _USER=${REPONSE[1]}
     _R=${REPONSE[2]}
     [ -z $_USER ] && return 1
@@ -141,10 +142,22 @@ deluser()
         Erreur "$CL_ERR --- Erreur: l'usager $CL_DTA$_USER $CL_ERR n'existe pas!\033[0m\n"
         return 1
     fi
-    if [ $_R = "o" ];then  
-       _deleteuser -r $_USER 
-    else  
-       _deleteuser $_USER 
+    if [ -z $_R ] || [ $_R == "N" ] || [ $_R == "n" ]; then  
+        if  ! userdel $_USER 2>/dev/null 
+        then 
+            Done " Échec de la destruction du compte $CL_DTA$_USER$CL_RESET !"
+            return 1
+        else
+            Done " L<usager $CL_DTA$_USER$CL_RESET a été détruit!"
+        fi
+    else 
+        if  ! userdel -r $_USER
+        then 
+            Done " Échec de la destruction du compte $CL_DTA$_USER$CL_RESET !"
+            return 1
+        else
+            Done " L'usager $CL_DTA$_USER$CL_RESET a été détruit!"
+        fi
     fi
     UPDATEUSR="o"
     return  0
@@ -158,15 +171,15 @@ chpass()
     _USER=${REPONSE[1]}
     [ -z $_USER ] && return 1
     if ! grep -w ^$_USER /etc/passwd &>/dev/null;then 
-        Erreur "$CL_ERR -- Erreur: l'usager $_CL_DTA $_USER $CL_ERR n'existe pas!\033[0m\n"
+        Done "$CL_ERR -- Erreur:$CL_RESET l'usager $_CL_DTA $_USER $CL_ERR n'existe pas!" "NO"
         return 1
     fi
-    if ! echo ${REPONSE[2]} | passwd $_USER --stdin &>/dev/null ; then
-       Erreur "$CL_ERR -- Erreur: changement de mot passe echoue..."
+    if ! echo "$_USER:${REPONSE[2]}" | chpasswd; then #2>/dev/null ; then
+       Done "$CL_ERR -- Erreur:$CL_RESET Le changement de mot passe pour l'usager $CL_DTA$_USER$CL_RESET a échoué!" "NO"
     else
-       Erreur "\033[0mMot de passe pour $CL_DTA$_USER \033[0mchange avec success\n"
+       Done "Le mot de passe de l'usager $CL_DTA$_USER$CL_RESET a été changé avec succès" "OK"
     fi
-    Done "Le mot de passe de l'usager $_USER a été changé avec succès"
+    
     return 0
 }
 
@@ -185,7 +198,7 @@ execute()
             newuser
         ;;
         2)
-            deluser
+           deluser
         ;;
         3)
             chpass
