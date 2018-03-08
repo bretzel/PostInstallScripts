@@ -37,16 +37,17 @@ echo "Vérification du package nfs :"
 
 
 unset NFSLIST
-unset NfsCloud
+unset NfsCloudSH
 unset Local 
 unset MPE
+
 
 function get_locations()
 {
     X=0
     sel=0
     IP=""
-    question "Adresse IP (ou préfixe) du Nuage:" 16 "Point de montage racine locale:" 40
+    question "(Données initiales) Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
     
     IP=${REPONSE[1]}
     Local=${REPONSE[2]}
@@ -72,19 +73,49 @@ function get_locations()
         ;;
         esac
     done
-    gotoxy 1 10
-#    for F in "${NsfList[@]}"
-#    do
-#        printf "$F\n"
-#    done
-    Done "Liste des points montage NFS complétée\n: --:${#NFSLIST[@]}:--:${NFSLIST[*]}:--" "OK"
     
+    X=0
+    
+    for F in ${NFSLIST[@]}
+    do
+        Status "$F : ${MPE[$X]}" "OK"
+        [ $((++X)) ]
+    done
 }
 
 
 get_locations
-Done "Test terminé..." "NO"
+
+echo "#.bin/sh"                         >  NfsCloud.sh
+echo " "                                >> NfsCloud.sh
+echo "if [ \""\$2\"" = \"up\" ]; then"  >> NfsCloud.sh
+echo " "                                >> NfsCloud.sh
+X=0
+for F in ${NFSLIST[@]}
+do
+    echo "    mount -t nfs $F  ${MPE[$X]}" >> NfsCloud.sh
+    [ $((++X)) ]
+done
+echo " "                                >> NfsCloud.sh
+X=0
+echo "elif [ \""\$2\"" = \"down\" ]; then"  >> NfsCloud.sh
+echo " "                                    >> NfsCloud.sh
+for F in ${NFSLIST[@]}
+do
+    echo "    umount ${MPE[$X]}"        >> NfsCloud.sh 
+    [ $((++X)) ]
+done
+echo " "                                >> NfsCloud.sh
+echo "fi"                               >> NfsCloud.sh
+echo " "                                >> NfsCloud.sh
+
+
+
+Done "Test terminé...  Dernier test ici..." "NO"
 return 
+
+
+
 x=`pacman -Qs nfs-utils`
 [ -z "$x" ] && sudo pacman --noconfirm -S nfs-utils || printf " Le support nfs est déjà installé :)\n\n"
 

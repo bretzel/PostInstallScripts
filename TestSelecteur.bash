@@ -35,4 +35,8 @@ do
   [ ${REPONSE[1]} == "Retour" ] && break
 done
 
-Done "Test terminé."
+Status "Test ligne 1" "NO"
+Status "Test ligne 2" "OK"
+Status "Test ligne 3" "NO"
+Status "Test ligne 4" "OK"
+Done   " -------- " "OK"

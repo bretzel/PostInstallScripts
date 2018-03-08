@@ -29,9 +29,17 @@ USERNAME=`id -u -n`
 export IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL
 export REPONSE=" "
 
+x_pos=0
+y_pos=0
+#export LINES COLUMNS
+export x_pos y_pos grp_starty=1
+
+
 if [ -z $COLUMNS ] ; then
     export COLUMNS=80 LINES=25
 fi
+
+export ligne=`printf "%$(expr $COLUMNS - 10)s"`
 
 Status()
 {
@@ -40,15 +48,20 @@ Status()
     gotoxy 1 $y
     printf "\033[1;37m$1"
     gotoxy $x $y
-    [ $2 == "NO" ] && printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n\n"
-    [ $2 == "OK" ] && printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n\n"
+    if [ $2 == "NO" ]; then
+        printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n\n"
+    else 
+        if [ $2 == "OK" ]; then
+            
+            printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n\n"
+        else 
+            M=$2
+            printf "\033[1;37m[\033[1;32m${M:0:2}\033[1;37m]\n\n"
+        fi
+    fi
 }
 
-x_pos=0
-y_pos=0
-#export LINES COLUMNS
-export x_pos y_pos grp_starty=1
-export ligne=`printf "%$(expr $COLUMNS - 10)s"`
+
 
 
 function Erreur()
