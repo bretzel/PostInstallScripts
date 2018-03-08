@@ -38,33 +38,48 @@ echo "Vérification du package nfs :"
 
 unset NfsList
 unset NfsCloud
+unset Local 
+unset MPE
 
 function get_locations()
 {
     let x=0
     sel=0
+    IP=""
+    question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
     
-    question "Adresse IP du Nuage:" 
-    
+    IP=${REPONSE[1]}
+    Local=${REPONSE[2]}
+
     TITRE=" Définition des points de montage NFS:"
-    while [ $sel != 2 ]
+    while [ $sel -ne 2 ]
     do
+        Done "--:${#NfsList[@]}:--:${NsfList[@]}:--\n" "OK"
         menu "Ajouter un emplacement" Terminé
         sel=${REPONSE[0]}
         case $sel in 
         1)
-            question "Donner l'emplacement:" 40
+            question "Donner l'emplacement:$IP:/" 40 "Monté dans le sous-dossier $Local/" 40
             if [ -z ${REPONSE[1]} ]; then
                 Done " Ajout annulé." "NO"
                 return
             else 
-                NfsList[$x]=${REPONSE[1]}
+                NfsList[$x]="$IP:/${REPONSE[1]}"
+                MPE[$x]="$Local/${REPONSE[2]}"
                 [ $((++$x)) ]
             fi
         ;;
         *) break
         ;;
+        esac
     done
+    gotoxy 1 10
+    printf "--:${#NfsList[@]}:--:${NsfList[@]}:--\n"
+#    for F in "${NsfList[@]}"
+#    do
+#        printf "$F\n"
+#    done
+    
     Done "Liste des points montage NFS complétée" "OK"
 }
 
