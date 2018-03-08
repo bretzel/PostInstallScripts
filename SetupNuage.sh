@@ -34,6 +34,44 @@ echo "Vérification du package nfs :"
 #fi
 
 # Archlinux:
+
+
+unset NfsList
+unset NfsCloud
+
+function get_locations()
+{
+    let x=0
+    sel=0
+    
+    question "Adresse IP du Nuage:" 
+    
+    TITRE=" Définition des points de montage NFS:"
+    while [ $sel != 2 ]
+    do
+        menu "Ajouter un emplacement" Terminé
+        sel=${REPONSE[0]}
+        case $sel in 
+        1)
+            question "Donner l'emplacement:" 40
+            if [ -z ${REPONSE[1]} ]; then
+                Done " Ajout annulé." "NO"
+                return
+            else 
+                NfsList[$x]=${REPONSE[1]}
+                [ $((++$x)) ]
+            fi
+        ;;
+        *) break
+        ;;
+    done
+    Done "Liste des points montage NFS complétée" "OK"
+}
+
+
+get_locations
+Done "Test terminé..." "NO"
+return 
 x=`pacman -Qs nfs-utils`
 [ -z "$x" ] && sudo pacman --noconfirm -S nfs-utils || printf " Le support nfs est déjà installé :)\n\n"
 
@@ -47,6 +85,7 @@ if [ ${REPONSE[0]} == "O" ]; then
 fi
 
 printf "Connexion au Nuage:\n"
+question "Donner l'emplacement du Nuage (NSF):" 40
 sudo mount -t nfs 192.168.2.62:/nfs/bretzelus /Nuage/A 2>/dev/null
 if [ $? == 0 ]; then
    printf " Nuage/A monté.\n"

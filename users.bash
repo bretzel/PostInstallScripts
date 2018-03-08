@@ -143,7 +143,7 @@ deluser()
         return 1
     fi
     if [ -z $_R ] || [ $_R == "N" ] || [ $_R == "n" ]; then  
-        if  ! userdel $_USER 2>/dev/null 
+        if  ! userdel $_USER &>/dev/null 
         then 
             Done " Échec de la destruction du compte $CL_DTA$_USER$CL_RESET !"
             return 1
@@ -198,7 +198,7 @@ execute()
             newuser
         ;;
         2)
-           deluser
+            deluser
         ;;
         3)
             chpass

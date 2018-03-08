@@ -450,7 +450,7 @@ ConfigureCloud()
 
 TestSelecteur()
 {
-    source TestSelecteur.bash *.tar.gz
+    source TestSelecteur.bash
 }
 
 
