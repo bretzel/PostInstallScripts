@@ -36,17 +36,17 @@ echo "Vérification du package nfs :"
 # Archlinux:
 
 
-unset NfsList
+unset NFSLIST
 unset NfsCloud
 unset Local 
 unset MPE
 
 function get_locations()
 {
-    let x=0
+    X=0
     sel=0
     IP=""
-    question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
+    question "Adresse IP (ou préfixe) du Nuage:" 16 "Point de montage racine locale:" 40
     
     IP=${REPONSE[1]}
     Local=${REPONSE[2]}
@@ -54,19 +54,18 @@ function get_locations()
     TITRE=" Définition des points de montage NFS:"
     while [ $sel -ne 2 ]
     do
-        Done "--:${#NfsList[@]}:--:${NsfList[@]}:--\n" "OK"
         menu "Ajouter un emplacement" Terminé
         sel=${REPONSE[0]}
         case $sel in 
         1)
             question "Donner l'emplacement:$IP:/" 40 "Monté dans le sous-dossier $Local/" 40
-            if [ -z ${REPONSE[1]} ]; then
+            if [ -n ${REPONSE[1]} ]; then
+                NFSLIST[$X]="$IP:/${REPONSE[1]}"
+                MPE[$X]="$Local/${REPONSE[2]}"
+                [ $((++X)) ]
+            else 
                 Done " Ajout annulé." "NO"
                 return
-            else 
-                NfsList[$x]="$IP:/${REPONSE[1]}"
-                MPE[$x]="$Local/${REPONSE[2]}"
-                [ $((++$x)) ]
             fi
         ;;
         *) break
@@ -74,13 +73,12 @@ function get_locations()
         esac
     done
     gotoxy 1 10
-    printf "--:${#NfsList[@]}:--:${NsfList[@]}:--\n"
 #    for F in "${NsfList[@]}"
 #    do
 #        printf "$F\n"
 #    done
+    Done "Liste des points montage NFS complétée\n: --:${#NFSLIST[@]}:--:${NFSLIST[*]}:--" "OK"
     
-    Done "Liste des points montage NFS complétée" "OK"
 }
 
 
@@ -91,7 +89,7 @@ x=`pacman -Qs nfs-utils`
 [ -z "$x" ] && sudo pacman --noconfirm -S nfs-utils || printf " Le support nfs est déjà installé :)\n\n"
 
 question "Le service NetworkManager doit-il être activé [O;N]? (Non par déf.) " 2
-if [ ${REPONSE[0]} == "O" ]; then
+if [ ${REPONSE[1]} == "O" ]; then
   sudo systemctl enable NetworkManager
   sudo systemctl start NetworkManager
   printf "Services actives. - "

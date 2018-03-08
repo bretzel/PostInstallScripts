@@ -40,8 +40,8 @@ Status()
     gotoxy 1 $y
     printf "\033[1;37m$1"
     gotoxy $x $y
-    [ $2 == "NO" ] && printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n"
-    [ $2 == "OK" ] && printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n"
+    [ $2 == "NO" ] && printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n\n"
+    [ $2 == "OK" ] && printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n\n"
 }
 
 x_pos=0
@@ -53,7 +53,6 @@ export ligne=`printf "%$(expr $COLUMNS - 10)s"`
 
 function Erreur()
 {
-    gotoxy 1 $(expr $LINES - 5)
     Status "$1 - \033[0;1;5;33mAppuyer pour continuer...$CL_RESET" "NO"
     read -n 1 -t 50 dummy
 }
@@ -62,7 +61,6 @@ export -f Erreur
 
 function Done()
 {
-    gotoxy 1 $(expr $LINES - 5)
     Status "$1 - \033[0;1;5;33mAppuyer pour continuer...$CL_RESET" "OK"
     read -n 1 -t 50 dummy
 }
@@ -198,7 +196,7 @@ question()
     do
         gotoxy $x_pos $(expr $c + $y_pos)
     printf "\033[0;47m${ligne:0:$(expr $longueur + 5)}\n"
-    [ $((++c)) ]
+    [ $((++c)) ]0
     done
     gotoxy $x_pos $y_pos
     printf "\033[30m$TITRE\n"
