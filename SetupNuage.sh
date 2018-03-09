@@ -1,37 +1,6 @@
 #!/bin/bash
 
 
-Clear
-gotoxy 1 7
-
-
-echo "Configuration du Nuage :"
-echo "os-release:"
-source /etc/os-release
-echo " Nom: $Name\n"
-
-
-#DistribCMD["Arch Linux"]="sudo pacman --noconfirm -S nfs-utils"
-#DistribCMD[1]="Debian"
-#DistribCMD[2]="Ubuntu"
-#DistribCMD[3]="Fedora"
-#DistribCMD[4]="Fedora"
-
-echo "Répertoire du montage /Nuage :"
-[ -d /Nuage ] || sudo mkdir -p /Nuage/A /Nuage/B
-echo "Vérification du package nfs :"
-
-
-#Ubuntu* Debian*
-# dpkg -s nfs-client 2>/dev/null >/dev/null || sudo apt-get -y install nfs-client
-
-#Fedora*
-#if rpm -q nfs-utils
-#then
-#   echo " nfs est installé"
-#else
-##    sudo yum install nfs-utils
-#fi
 
 # Archlinux:
 
@@ -53,6 +22,17 @@ function get_locations()
     Local=${REPONSE[2]}
 
     TITRE=" Définition des points de montage NFS:"
+    
+    if [ ! -d $Local ]; then 
+        if ! mkdir -p  $Local; then
+            Erreur " Le répertoire racine de montage ne peut être créé."
+            return 1
+        fi
+        Done " Le répertoire racine de montage a été créé." "OK"
+    else 
+        Done " Répertoire racine de montage existe déjà" "OK"
+    fi
+    
     while [ $sel -ne 2 ]
     do
         menu "Ajouter un emplacement" Terminé
@@ -66,7 +46,7 @@ function get_locations()
                 [ $((++X)) ]
             else 
                 Done " Ajout annulé." "NO"
-                return
+                return 1
             fi
         ;;
         *) break
@@ -81,10 +61,18 @@ function get_locations()
         Status "$F : ${MPE[$X]}" "OK"
         [ $((++X)) ]
     done
+    return 0
 }
 
 
 get_locations
+if [ $? -eq 1 ]
+then
+    Done "La configuration interractive a échoué" "NO"
+    return 0
+fi
+
+return 
 
 echo "#.bin/sh"                         >  NfsCloud.sh
 echo " "                                >> NfsCloud.sh
