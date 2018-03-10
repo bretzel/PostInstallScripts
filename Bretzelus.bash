@@ -63,7 +63,10 @@ Status()
     fi
 }
 
-
+function Wait()
+{
+    read -t $1 $2
+}
 
 
 function Erreur()
