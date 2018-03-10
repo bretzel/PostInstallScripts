@@ -11,16 +11,26 @@ unset Local
 unset MPE
 
 
+
 function get_locations()
 {
     X=0
     sel=0
     IP=""
-    question "(Données initiales) Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
+    TITRE="(Données initiales [$CL_ERR$DISTNAME$CL_WINBCK\033[32m])"
+    
+    question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
     
     IP=${REPONSE[1]}
     Local=${REPONSE[2]}
-
+    if [ -z $IP ]; then 
+        Done " Configuration du nuage avorté." "NO"
+        return 1
+    elif [ -z $Local ]; then 
+        Done " Configuration du nuage avorté." "NO"
+        return 1
+    fi
+    
     TITRE=" Définition des points de montage NFS:"
     
     if [ ! -d $Local ]; then 
@@ -43,6 +53,10 @@ function get_locations()
             if [ -n ${REPONSE[1]} ]; then
                 NFSLIST[$X]="$IP:/${REPONSE[1]}"
                 MPE[$X]="$Local/${REPONSE[2]}"
+                if [! -d "MPE[$X]" ] 
+                then 
+                    mkdir -p MPE[$X]
+                fi
                 [ $((++X)) ]
             else 
                 Done " Ajout annulé." "NO"
@@ -68,12 +82,11 @@ function get_locations()
 get_locations
 if [ $? -eq 1 ]
 then
-    Done "La configuration interractive a échoué" "NO"
+    Done "La configuration interractive a échoué ou a été avortée par l'usager" "NO"
     return 0
 fi
 
-return 
-
+printf "Génération du ficher de script pour NetworkManager:\n"
 echo "#.bin/sh"                         >  NfsCloud.sh
 echo " "                                >> NfsCloud.sh
 echo "if [ \""\$2\"" = \"up\" ]; then"  >> NfsCloud.sh
@@ -99,10 +112,14 @@ echo " "                                >> NfsCloud.sh
 
 
 
-Done "Test terminé...  Dernier test ici..." "NO"
-return 
 
+TITRE="Sélectionner le point de montage à monter ou passer:"
+sel=0
 
+menu ${NFSLIST[*]} Tous Passer
+sel=${REPONSE[0]}
+Done " --> ${REPONSE[1]} --> Terminé" "OK"
+return
 
 x=`pacman -Qs nfs-utils`
 [ -z "$x" ] && sudo pacman --noconfirm -S nfs-utils || printf " Le support nfs est déjà installé :)\n\n"
