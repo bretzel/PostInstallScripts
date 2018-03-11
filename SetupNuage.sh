@@ -117,29 +117,33 @@ function generate_script()
 {
     X=0
     printf "Génération du script montage NFS pour NetworkManager::Dispacher:\n"
-    echo "#.bin/sh"                         >  NfsCloud.sh
-    echo ""                                >> NfsCloud.sh
-    echo "if [ \""\$2\"" = \"up\" ]; then"  >> NfsCloud.sh
-    echo ""                                >> NfsCloud.sh
+    echo "#.bin/sh"                             >  NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
+    echo "if [ \""\$2\"" = \"up\" ]; then"      >> NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
     X=0
     for F in ${NFSLIST[@]}
     do
-        echo "    mount -t nfs $F  ${MPE[$X]}" >> NfsCloud.sh
+        echo "    mount -t nfs $F  ${MPE[$X]}"  >> NfsCloud.sh
         [ $((++X)) ]
     done
-    echo ""                                >> NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
    
    X=0
     echo "elif [ \""\$2\"" = \"down\" ]; then"  >> NfsCloud.sh
-    echo ""                                    >> NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
     for F in ${NFSLIST[@]}
     do
-        echo "    umount ${MPE[$X]}"        >> NfsCloud.sh 
+        echo "    umount ${MPE[$X]}"            >> NfsCloud.sh 
         [ $((++X)) ]
     done
-    echo ""                                >> NfsCloud.sh
-    echo "fi"                               >> NfsCloud.sh
-    echo ""                                >> NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
+    echo "fi"                                   >> NfsCloud.sh
+    echo ""                                     >> NfsCloud.sh
+    
+    TITRE="Script du montage du nuage en NFS généré."
+    question "Est-il désiré de copier le script sous /etc/NetworkManager/dispacher.d/ ?[O/n]" 2
+    [ -z ${REPONSE[1]} ] && 
 }
 
 
@@ -166,8 +170,11 @@ function nfs_progs()
         sel=0
         TITRE="Sélectionner la commande associée avec la distribution(ou dérivée) :"
         menu "($DISTNAME) ${ICommand[*]}" Passer
-        [ ${REPONSE[1] == "Passer" ] || [ ${REPONSE[0]} >= ${#ICommand[@]} ] &&  return 1
-        
+        if [ ${REPONSE[1]} == "Passer" ] || [ ${REPONSE[0]} >= ${#ICommand[@]} ]
+        then 
+            Done "Selection annulée." "NO"
+            return 1
+        fi
         let sel=$sel-1
         if  ! ${ICommand[$sel]} 
         then
