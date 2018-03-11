@@ -47,6 +47,7 @@ function init_nfs_data()
         
         question "Est-il souhaité de renseigner /etc/host ? Donner l'alias ou [ENTER] pour passer" 40
         CloudAlias=${REPONSE[1]}
+        
         if [ -n "$CloudALias" ]; then
             echo "$IP   $CloudAlias" >>/etc/hosts
             Done "etc/hosts est renseigné." "OK"
@@ -61,7 +62,6 @@ function init_nfs_data()
         else 
             Done " Répertoire racine de montage existe déjà" "OK"
         fi
-
         return 0
     }
     
