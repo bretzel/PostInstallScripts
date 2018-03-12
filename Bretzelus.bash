@@ -19,7 +19,7 @@ CL_ERR="\033[1;31m"
 CL_DTA="\033[1;33m"
 CL_MENUNORMAL="\033[44;1;33m"
 CL_MENUSELECT="\033[42;0;33m"
-CL_WINBCK="\033[47;1;37m"
+CL_WINBCK="\033[0;30;47m"
 CL_RESET="\033[0m"
 CL_QUESTION="\033[0;30;46m"
 CL_QUESTION_SEL="\033[0;34;46m"
@@ -213,23 +213,25 @@ question()
     while [ $c -lt $nblignes ]
     do
         gotoxy $x_pos $(expr $c + $y_pos)
-    printf "\033[0;47m${ligne:0:$(expr $longueur + 5)}\n"
-    [ $((++c)) ]0
+        printf "$CL_WINBCK${ligne:0:$(expr $longueur + 5)}$CL_RESET\n"
+        [ $((++c)) ]
     done
+    
     gotoxy $x_pos $y_pos
-    printf "\033[30m$TITRE\n"
+    printf "$CL_WINBCK$TITRE"
     gotoxy $x_pos $(expr $y_pos + 1)
     let c=1
     # afficher le fond de la zone de question en CYAN
+    
     while [ $c -le $nbQuestions ]
     do
-    gotoxy $(expr $x_pos + 2)  $(expr $c + $y_pos)
-    printf "\033[0;46m${ligne:0:$(expr $longueur + 1)}"
-    [ $((++c)) ]
-    if [  $c -eq 2 ]; then
+        gotoxy $(expr $x_pos + 2)  $(expr $c + $y_pos)
+        printf "\033[0;46m${ligne:0:$(expr $longueur + 1)}"
+        [ $((++c)) ]
+        if [  $c -eq 2 ]; then
         continue
-    fi
-    printf "\033[0m "
+        fi
+        printf "\033[0m "
     done
     # Ligne noir pour effet d'ombrage:
     gotoxy $(expr $x_pos + 3)  $(expr $c + $y_pos)
@@ -250,7 +252,7 @@ question()
         else
         arg=0
         gotoxy $(expr $x_pos + $pos_prompt + 2) $(expr $c + $y_pos)
-        printf "$IN_FIELD${ligne:0:$par}\n"
+        printf "$IN_FIELD${ligne:0:$par}$CL_RESET\n"
         field_len[$c]=$par
         [ $((++c)) ]
     fi
@@ -461,7 +463,7 @@ FixQtScroll()
 
 ConfigureCloud()
 {
-    source ${Files[3]}
+    source ./${Files[3]}
 }
 
 TestSelecteur()
