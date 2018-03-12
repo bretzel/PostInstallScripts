@@ -163,45 +163,45 @@ function init_nfs_data()
 
 
 
-# function nfs_progs()
-# {
-#     QCommand["debian"]="PKG=\$(dpkg-query -l nfs-client|grep \"ii\")"
-#     QCommand["ubuntu"]="PKG=\$(dpkg-query -l nfs-client|grep \"ii\")"
-#     QCommand["arch"]="PKG=\$(pacman -Qs nfs-utils)"
-#     QCommand["default"]="PKG=\$(pacman -Qs nfs-utils)"
-#     
-#     ICommand["debian"]="sudo apt-get --force-yes --yes install nfs-client"
-#     ICommand["ubuntu"]="sudo apt-get --force-yes --yes install nfs-client"
-#     ICommand["fedora"]="sudo dnf -y install nfs-utils"
-#     ICommand["redhat"]="sudo dnf -y install nfs-utils"
-#     ICommand["arch"]="sudo pacman --noconfirm -S nfs-utils"
-#     ICommand["default"]="sudo pacman --noconfirm -S nfs-utils"
-# 
-#     $QCommand[$DISTNAME]
-#     
-#     if [ -n $PKG ]
-#     then
-#         Status " Le package du client nfs est déjà installé." "OK"
-#     else
-#         sel=0
-#         TITRE="Sélectionner la commande associée avec la distribution(ou dérivée) :"
-#         menu "($DISTNAME) ${ICommand[*]}" Passer
-#         if [ ${REPONSE[1]} == "Passer" ] || [ ${REPONSE[0]} >= ${#ICommand[@]} ]
-#         then 
-#             Done "Selection annulée." "NO"
-#             return 1
-#         fi
-#         let sel=$sel-1
-#         if  ! ${ICommand[$sel]} 
-#         then
-#             Erreur " Commande échouée."
-#             return 1
-#         else
-#             Done " Le package du client NFS a été installé correctement" "OK"
-#         fi
-#     fi
-#     return 0
-# }
+function nfs_progs()
+{
+    QCommand["debian"]="PKG=\$(dpkg-query -l nfs-client|grep \"ii\")"
+    QCommand["ubuntu"]="PKG=\$(dpkg-query -l nfs-client|grep \"ii\")"
+    QCommand["arch"]="PKG=\$(pacman -Qs nfs-utils)"
+    QCommand["default"]="PKG=\$(pacman -Qs nfs-utils)"
+    
+    ICommand["debian"]="sudo apt-get --force-yes --yes install nfs-client"
+    ICommand["ubuntu"]="sudo apt-get --force-yes --yes install nfs-client"
+    ICommand["fedora"]="sudo dnf -y install nfs-utils"
+    ICommand["redhat"]="sudo dnf -y install nfs-utils"
+    ICommand["arch"]="sudo pacman --noconfirm -S nfs-utils"
+    ICommand["default"]="sudo pacman --noconfirm -S nfs-utils"
+
+    $QCommand[$DISTNAME]
+    
+    if [ -n $PKG ]
+    then
+        Status " Le package du client nfs est déjà installé." "OK"
+    else
+        sel=0
+        TITRE="Sélectionner la commande associée avec la distribution(ou dérivée) :"
+        menu "($DISTNAME) ${ICommand[*]}" Passer
+        if [ ${REPONSE[1]} == "Passer" ] || [ ${REPONSE[0]} >= ${#ICommand[@]} ]
+        then 
+            Done "Selection annulée." "NO"
+            return 1
+        fi
+        let sel=$sel-1
+        if  ! ${ICommand[$sel]} 
+        then
+            Erreur " Commande échouée."
+            return 1
+        else
+            Done " Le package du client NFS a été installé correctement" "OK"
+        fi
+    fi
+    return 0
+}
 
 # function set_nfs_services()
 # {
