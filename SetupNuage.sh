@@ -10,7 +10,7 @@ NfsCloudSH="NasCloud.sh"
 unset Local
 unset IP
 unset MPE
-unset CloudAlias
+unset HostAlias
 # PKG_OK=$(dpkg-query -l nfs-client|grep "ii"); [ -z $PKG_OK  ] 
 # echo Checking for somelib: $PKG_OK
 # if [ "" == "$PKG_OK" ]; then
@@ -40,122 +40,127 @@ function init_nfs_data()
         if [ -z "$IP" ] || [ -z "$Local" ]; then 
             Done " Configuration du nuage avorté." "NO"
             return 1
-#         elif [ -z "$Local" ]; then 
-#             Done " Configuration du nuage avorté." "NO"
-#             return 1
         fi
-        
-        #o=`grep "$IP" /etc/hosts`
-        if [ -z `grep "$IP" /etc/hosts` ]
-        then 
+
+        O=`grep "$IP" /etc/hosts` # Isoler la sortie de grep dans une variable ( $O ). 
+        if [ -z  "$O" ]; then     # Pour pouvoir isoler ici la chaîne de caractères en une seule pour éviter une erreur de surplus d'arguments.
             question "Est-il souhaité de renseigner /etc/hosts ? Donner l'alias ou [ENTER] pour passer" 40
-            CloudAlias=${REPONSE[1]}
+            HostAlias=${REPONSE[1]}
         
-            if [ -n "$CloudAlias" ]; then
-                echo "$IP   $CloudAlias" >>/etc/hosts
-                if [ $? = 1 ] 
-                then 
+            if [ -n "$HostAlias" ]; then
+                echo "$IP   $HostAlias" >>/etc/hosts
+                if [ $? = 1 ]; then 
                     Erreur "/etc/hosts ne peut être renseigné." "NO"
                     return 1
                 else 
                     Done "/etc/hosts est renseigné." "OK"
                 fi
             fi
-        fi
+        fi 
         
         if [ ! -d $Local ]; then 
-            if ! mkdir -p  $Local; then
+            if ! mkdir -p  $Local 2>/dev/null; then
                 Erreur " Le répertoire racine de montage ne peut être créé."
                 return 1
             fi
             Done " Le répertoire racine de montage a été créé." "OK"
         else 
-            Done " Répertoire racine de montage existe déjà" "OK"
+            Done " Le répertoire racine de montage existe déjà" "OK"
         fi
         return 0
     }
     
-#     function set_binds()
-#     {
-#         sel=0
-#         while [ $sel -ne 2 ]
-#         do
-#             menu "Ajouter un emplacement" Terminé
-#             sel=${REPONSE[0]}
-#             case $sel in 
-#             1)
-#                 question "Donner l'emplacement:$IP:/" 40 "Monté dans le sous-dossier $Local/" 40
-#                 if [ -n ${REPONSE[1]} ]; then
-#                     NFSLIST[$X]="$IP:/${REPONSE[1]}"
-#                     MPE[$X]="$Local/${REPONSE[2]}" # Il y a ici un fort risque de duplicat du point de montage locale...
-#                     if [! -d "MPE[$X]" ]           # Il faudra prévenir les duplicats dans le tableau MPE. D'ailleurs, il faut
-#                     then                           # faire la même chose pour le tableau NFSLIST...
-#                         mkdir -p MPE[$X]
-#                     fi
-#                     [ $((++X)) ]
-#                 else 
-#                     Done " Ajout annulé." "NO"
-#                     return 1
-#                 fi
-#             ;;
-#             *) break
-#             ;;
-#             esac
-#         done
-#         
-#         X=0
-#         
-#         for F in ${NFSLIST[@]}
-#         do
-#             Status "$F : ${MPE[$X]}" "OK"
-#             [ $((++X)) ]
-#         done
-#         return 0        
-#     }
+    function set_binds()
+    {
+        sel=0
+        while [ $sel -ne 2 ]
+        do
+            TITRE=" Définition des points de montage NFS (Préparation du script):"
+            menu "Ajouter un emplacement" Terminé
+            sel=${REPONSE[0]}
+            case $sel in 
+            1)
+                question "Donner l'emplacement:$IP:/" 40 "-> Monté dans le sous-dossier $Local/" 40
+                if [ -n ${REPONSE[1]} ]; then
+                    NFSLIST[$X]="$IP:/${REPONSE[1]}"
+                    MPE[$X]="$Local/${REPONSE[2]}" # Il y a ici un fort risque de duplicat du point de montage locale...
+                    if [! -d "MPE[$X]" ]           # Il faudra prévenir les duplicats dans le tableau MPE. D'ailleurs, il faut
+                    then                           # faire la même chose pour le tableau NFSLIST...
+                        mkdir -p MPE[$X]
+                    fi
+                    [ $((++X)) ]
+                else 
+                    Done " Ajout annulé." "NO"
+                    return 1
+                fi
+            ;;
+            *) break
+            ;;
+            esac
+        done
+        
+        X=0
+        
+        for F in ${NFSLIST[@]}
+        do
+            Status "$F : ${MPE[$X]}" "OK"
+            [ $((++X)) ]
+        done
+        return 0        
+    }
+
+    function generate_script()
+    {
+        X=0
+        Status "Génération du script montage NFS pour NetworkManager::Dispacher:" "OK"
+        echo "#.bin/sh"                             >  $NfsCloudSH
+        echo ""                                     >> $NfsCloudSH
+        echo "if [ \""\$2\"" = \"up\" ]; then"      >> $NfsCloudSH
+        echo ""                                     >> $NfsCloudSH
+        X=0
+        for F in ${NFSLIST[@]}
+        do
+            echo "    mount -t nfs $F  ${MPE[$X]}"  >> $NfsCloudSH
+            [ $((++X)) ]
+        done
+        echo ""                                     >> $NfsCloudSH
+    
+        X=0
+        echo "elif [ \""\$2\"" = \"down\" ]; then"  >> $NfsCloudSH
+        echo ""                                     >> $NfsCloudSH
+        for F in ${NFSLIST[@]}
+        do
+            echo "    umount ${MPE[$X]}"            >> $NfsCloudSH
+            [ $((++X)) ]
+        done
+        echo ""                                     >> $NfsCloudSH
+        echo "fi"                                   >> $NfsCloudSH
+        echo ""                                     >> $NfsCloudSH
+        
+        TITRE="Script du montage du nuage en NFS généré."
+        question "Est-il désiré de copier le script sous /etc/NetworkManager/dispacher.d/ ?[O/n]" 2
+        if [ -z ${REPONSE[1]} ] || [ ${REPONSE[1]} == "O" ] || [ ${REPONSE[1]} == "o" ]; then 
+            if ! cp $NfsCloudSH /etc/NetworkManager/dispacher.d; then
+                Erreur " La copie du script vers /etc/NetworkManager/dispacher.d/ a échoué."
+                return 1
+            fi
+            Done " Copie effectuée aavec succes" "OK"
+        else 
+            Done " Copie annulée." "OK"
+        fi
+        return 0
+    }
+
     
     init_root_locations
-    if [ $? = 1 ]; then  
-        return 1
-    fi
-    
-    TITRE=" Définition des points de montage NFS:"
-    
-}
-
-
-function generate_script()
-{
-    X=0
-    printf "Génération du script montage NFS pour NetworkManager::Dispacher:\n"
-    echo "#.bin/sh"                             >  NfsCloud.sh
-    echo ""                                     >> NfsCloud.sh
-    echo "if [ \""\$2\"" = \"up\" ]; then"      >> NfsCloud.sh
-    echo ""                                     >> NfsCloud.sh
-    X=0
-    for F in ${NFSLIST[@]}
-    do
-        echo "    mount -t nfs $F  ${MPE[$X]}"  >> NfsCloud.sh
-        [ $((++X)) ]
-    done
-    echo ""                                     >> NfsCloud.sh
-   
-   X=0
-    echo "elif [ \""\$2\"" = \"down\" ]; then"  >> NfsCloud.sh
-    echo ""                                     >> NfsCloud.sh
-    for F in ${NFSLIST[@]}
-    do
-        echo "    umount ${MPE[$X]}"            >> NfsCloud.sh 
-        [ $((++X)) ]
-    done
-    echo ""                                     >> NfsCloud.sh
-    echo "fi"                                   >> NfsCloud.sh
-    echo ""                                     >> NfsCloud.sh
-    
-    TITRE="Script du montage du nuage en NFS généré."
-    question "Est-il désiré de copier le script sous /etc/NetworkManager/dispacher.d/ ?[O/n]" 2
-    [ -z ${REPONSE[1]} ] && return 1
+#    [ $? = 1 ] && return 1
+    set_binds
+    [ $? = 1 ] && return 1
+    generate_script
     return 0
 }
+
+
 
 
 # function nfs_progs()
@@ -211,10 +216,7 @@ function generate_script()
 #     return 0
 # }
 init_nfs_data
-if [ $? -eq 1 ]; then
-    Done "La configuration interractive a échoué ou a été avortée par l'usager" "NO"
-    return 0
-fi
+[ $? -eq 1 ] && return 1
 # 
 # 
 # TITRE="Sélectionner le point de montage à monter ou passer:"
