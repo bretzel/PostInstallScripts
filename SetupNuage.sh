@@ -70,6 +70,7 @@ function init_nfs_data()
         return 0
     }
     
+    
     function set_binds()
     {
         sel=0
@@ -215,8 +216,25 @@ function nfs_progs()
 #     fi
 #     return 0
 # }
-init_nfs_data
-[ $? -eq 1 ] && return 1
+
+
+function NFSMain()
+{
+    
+    Sel=0
+    
+    menu "Configuration Initale" "Support logiciel NFS" "Service Système (systemctl)" "Retour/Terminé"
+    
+    Sel=${REPONSDE[0]}
+    case $Sel in
+    
+    init_nfs_data
+    [ $? -eq 1 ] && return 1
+    nfs_progs
+    [ $? -eq 1 ] && return 1
+    
+    
+    
 # 
 # 
 # TITRE="Sélectionner le point de montage à monter ou passer:"
