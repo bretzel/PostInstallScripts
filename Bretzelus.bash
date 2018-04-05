@@ -29,6 +29,7 @@ declare -A CloudFields=( [Ip]="30 2" [MountPoint]="x y" [NetAlias]="x y" )
 
 export CloudNFSData CloudFields
 
+source RemoteDestination.bash
 
 
 USERNAME=`id -u -n`

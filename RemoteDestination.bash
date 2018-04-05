@@ -1,2 +1,2 @@
-export RemoteDestination="/netfs/b/Linux/Home.Backup"
+export RemoteDestination="/netfs/bretzelus/Linux/Home.Backup"
 

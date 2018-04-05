@@ -2,15 +2,15 @@
 
 if [ "$2" = "up" ]; then
 
-    mount -t nfs netfs:/nfs/bretzelus  /netfs/b
-    mount -t nfs netfs:/nfs/Public  /netfs/p
-    mount -t nfs netfs:/nfs/xilef  /netfs/x
+    mount -t nfs netfs:/nfs/bretzelus  /netfs/bretzelus
+    mount -t nfs netfs:/nfs/Public  /netfs/public
+    mount -t nfs netfs:/nfs/xilef  /netfs/xilef
 
 elif [ "$2" = "down" ]; then
 
-    umount /netfs/b
-    umount /netfs/p
-    umount /netfs/x
+    umount /netfs/bretzelus
+    umount /netfs/public
+    umount /netfs/xilef
 
 fi
 

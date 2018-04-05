@@ -51,8 +51,8 @@ function init_nfs_data()
         
         DisplayTitleLines
         
-        Status "Terminé. Appuyer pour retourner." "OK"        
-        return 1
+#        Status "Terminé. Appuyer pour retourner." "OK"        
+#        return 1
         
         O=`grep "$IP" /etc/hosts` # Isoler la sortie de grep dans une variable ( $O ). 
         if [ -z  "$O" ]; then     # Pour pouvoir isoler ici la chaîne de caractères en une seule pour éviter une erreur de surplus d'arguments.
@@ -71,7 +71,7 @@ function init_nfs_data()
         fi 
         
         if [ ! -d $Local ]; then 
-            if ! sudo mkdir -p  $Local 2>/dev/null; then
+            if ! mkdir -p  $Local 2>/dev/null; then
                 Erreur " Le répertoire racine de montage ne peut être créé."
                 return 1
             fi
@@ -243,13 +243,13 @@ function NFSMain()
 {
     let sel=0
     
-    gotoxy ${CloudFields[Ip]}
-    AA=${CloudNFSData[Ip]}
-    printf "IP: $AA\n"
-    CloudNFSData[Ip]="192.168.2.62"
-    AA=${CloudNFSData[Ip]}    
-    Status " testing cloudfields terminé[$AA]: Appuyer pour retourner.." "OK"
-    return 1
+    #gotoxy ${CloudFields[Ip]}
+    #AA=${CloudNFSData[Ip]}
+    #printf "IP: $AA\n"
+    #CloudNFSData[Ip]="192.168.2.62"
+    #AA=${CloudNFSData[Ip]}    
+    #Status " testing cloudfields terminé[$AA]: Appuyer pour retourner.." "OK"
+    #return 1
     
     while [ $sel -ne 4 ]
     do
