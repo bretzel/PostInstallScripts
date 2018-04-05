@@ -11,6 +11,7 @@ unset Local
 unset IP
 unset MPE
 unset HostAlias
+
 # PKG_OK=$(dpkg-query -l nfs-client|grep "ii"); [ -z $PKG_OK  ] 
 # echo Checking for somelib: $PKG_OK
 # if [ "" == "$PKG_OK" ]; then
@@ -69,10 +70,11 @@ function init_nfs_data()
         else 
             Done " Le répertoire racine de montage existe déjà" "OK"
         fi
+        
         return 0
     }
     
-    
+        
     function set_binds()
     {
         sel=0
@@ -155,9 +157,16 @@ function init_nfs_data()
         return 0
     }
 
+#        Output=`mount | grep "$Local"`
+#        if [ -z $Output ]; then
+#            TITRE="Connection temporaire au nuage:"
+#            question "Donner
+#        fi
+
+    
     
     init_root_locations
-#    [ $? = 1 ] && return 1
+    [ $? = 1 ] && return 1
     set_binds
     [ $? = 1 ] && return 1
     generate_script
@@ -223,19 +232,32 @@ function nfs_progs()
 
 function NFSMain()
 {
+    let sel=0
+    while [ $sel -ne 4 ]
+    do
+        TITRE="Configuration du Nuage protocole nfs:"
+        menu "Configuration Initale" "Support logiciel NFS" "Service Système (systemctl)" "Retour/Terminé"
+        
+        sel=${REPONSE[0]}
+        case $sel in 
+        1)
+            init_nfs_data
+            [ $? -eq 1 ] && return 1
+        ;;
+        2)
+            nfs_progs
+            [ $? -eq 1 ] && return 1
+        ;;
+        3)
+            break
+        ;;
+        4)
+            break
+        ;;
+        esac
+    done
     
-    #Sel=0
-    
-    #menu "Configuration Initale" "Support logiciel NFS" "Service Système (systemctl)" "Retour/Terminé"
-    
-    #Sel=${REPONSDE[0]}
-    #case $Sel in 
-    
-    init_nfs_data
-    [ $? -eq 1 ] && return 1
-    #nfs_progs
-    #[ $? -eq 1 ] && return 1
-    
+    return  0
 }
 
 NFSMain

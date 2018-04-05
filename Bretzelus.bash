@@ -11,6 +11,11 @@ Files[2]="FixQtMicroScrollBug.sh"
 Files[3]="SetupNuage.sh"
 Files[4]="Archive.etc.sh"
 
+
+
+
+
+
 CSUP="A"
 CSDOWN="B"
 
@@ -24,11 +29,14 @@ CL_RESET="\033[0m"
 CL_QUESTION="\033[0;30;46m"
 CL_QUESTION_SEL="\033[0;34;46m"
 
+
+
+
 USERNAME=`id -u -n`
 source /etc/os-release
 DISTNAME=$ID 
-
-export DISTNAME IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL
+let TTL_LINE=0
+export DISTNAME IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL TTL_LINES TTL_LINE
 export REPONSE=" "
 
 x_pos=0
@@ -68,6 +76,16 @@ function Wait()
     read -t $1 $2
 }
 
+
+function AddTitleLine()
+{
+    if [ -n $2 ]; then 
+        [ $2 == "clear" ] && let TTL_LINE=0
+    else
+        [ $(( ++TTL_LINE )) ]
+        TTL_LINES[$TTL_LINE]=$1
+    fi
+}
 
 function Erreur()
 {
@@ -131,41 +149,41 @@ function Clear()
 {
     clear
 
-    longueur=$(expr $COLUMNS - 4)
-    c=0
+#    longueur=$(expr $COLUMNS - 4)
+#    c=0
+#
+#    center_str -v $longueur
 
-    center_str -v $longueur
+#    while [ $c -lt 6 ]
+#    do
+#       gotoxy $x_pos $(expr $c + 1)
+#        printf "$CL_WINBCK$ligne"
+#        [ $((c++)) ]
+#    done
+#    let c=1
+#    while [ $c -le 3 ]
+#    do
+#        gotoxy $(expr $x_pos + 2) $(expr $c + 1)
+#        printf "$IN_FIELD${ligne:0:$(expr $longueur - 12)}"
+#        if [ $c -gt 1 ]; then
+#        printf "\033[0;40m "
+#    fi
+#    [ $((c++)) ]
+#    done
+#    printf $CL_RESET
+#    # Ligne d'ombrage
+#
+#    gotoxy $(expr $x_pos + 3) $(expr $c + 1)
+#
+#    echo -e "\033[0;40m${ligne:0:$(expr $longueur - 12)}"
+#
+#    # text du titre du programme:
+#    txt="$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
+#    center_str -v $(expr ${#txt} - 84)
+#
 
-    while [ $c -lt 6 ]
-    do
-       gotoxy $x_pos $(expr $c + 1)
-        printf "$CL_WINBCK$ligne"
-        [ $((c++)) ]
-    done
-    let c=1
-    while [ $c -le 3 ]
-    do
-        gotoxy $(expr $x_pos + 2) $(expr $c + 1)
-        printf "$IN_FIELD${ligne:0:$(expr $longueur - 12)}"
-        if [ $c -gt 1 ]; then
-        printf "\033[0;40m "
-    fi
-    [ $((c++)) ]
-    done
-    printf $CL_RESET
-    # Ligne d'ombrage
-
-    gotoxy $(expr $x_pos + 3) $(expr $c + 1)
-
-    echo -e "\033[0;40m${ligne:0:$(expr $longueur - 12)}"
-
-    # text du titre du programme:
-    txt="$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
-    center_str -v $(expr ${#txt} - 84)
-
-    gotoxy $x_pos 3
-    echo -e $txt #"$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
     gotoxy 1 1
+    echo -e $txt #"$IN_FIELD\033[1;37m $PROGRAM Pour \033[1;33m`echo $HOSTNAME|cut -d. -f1` (\033[31m$USERNAME$IN_FIELD)$CL_RESET"
 }
 
 
@@ -328,7 +346,7 @@ menu()
     let w_dy_menu=$nbItems+3
     let c=0
 
-	center_str -v $w_menu $(expr $LINES - $(expr $w_dy_menu + 10))
+	center_str -v $w_menu $(expr $LINES - $(expr $w_dy_menu + 20))
 # Imprimer le fond de l'écran
     while [ $c -lt $(expr $w_dy_menu + 5) ]
     do
