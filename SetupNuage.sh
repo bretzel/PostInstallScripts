@@ -33,10 +33,12 @@ function init_nfs_data()
     function init_root_locations()
     {
         TITRE="(Données initiales [$CL_ERR$DISTNAME$CL_WINBCK])"
-        question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40
+        question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40 "Alias:" 40
     
         IP=${REPONSE[1]}
         Local=${REPONSE[2]}
+        HostAlias=${REPONSE[3]}
+
         if [ -z "$IP" ] || [ -z "$Local" ]; then 
             Done " Configuration du nuage avorté." "NO"
             return 1
@@ -44,22 +46,22 @@ function init_nfs_data()
 
         O=`grep "$IP" /etc/hosts` # Isoler la sortie de grep dans une variable ( $O ). 
         if [ -z  "$O" ]; then     # Pour pouvoir isoler ici la chaîne de caractères en une seule pour éviter une erreur de surplus d'arguments.
-            question "Est-il souhaité de renseigner /etc/hosts ? Donner l'alias ou [ENTER] pour passer" 40
-            HostAlias=${REPONSE[1]}
-        
-            if [ -n "$HostAlias" ]; then
-                echo "$IP   $HostAlias" >>/etc/hosts
-                if [ $? = 1 ]; then 
-                    Erreur "/etc/hosts ne peut être renseigné." "NO"
-                    return 1
-                else 
-                    Done "/etc/hosts est renseigné." "OK"
+            question "Est-il souhaité de renseigner /etc/hosts [O/n] ?" 2
+            if [ -z ${REPONSE[1]} ] || [ ${REPONSE[1]} == "O" ] || [ ${REPONSE[1]} == "o" ]; then      
+                if [ -z "$O" ]; then
+                    echo "$IP   $HostAlias" >>/etc/hosts
+                    if [ $? = 1 ]; then 
+                        Erreur "/etc/hosts ne peut être renseigné." "NO"
+                        return 1
+                    else 
+                        Done "/etc/hosts est renseigné [$O]." "OK"
+                    fi
                 fi
             fi
         fi 
         
         if [ ! -d $Local ]; then 
-            if ! mkdir -p  $Local 2>/dev/null; then
+            if ! sudo mkdir -p  $Local 2>/dev/null; then
                 Erreur " Le répertoire racine de montage ne peut être créé."
                 return 1
             fi
@@ -81,13 +83,14 @@ function init_nfs_data()
             sel=${REPONSE[0]}
             case $sel in 
             1)
-                question "Donner l'emplacement:$IP:/" 40 "-> Monté dans le sous-dossier $Local/" 40
+                question "Donner l'emplacement:$HostAlias:/" 40 "-> Monté dans le sous-dossier $Local/" 40
                 if [ -n ${REPONSE[1]} ]; then
-                    NFSLIST[$X]="$IP:/${REPONSE[1]}"
+                    NFSLIST[$X]="$HostAlias:/${REPONSE[1]}"
                     MPE[$X]="$Local/${REPONSE[2]}" # Il y a ici un fort risque de duplicat du point de montage locale...
-                    if [! -d "MPE[$X]" ]           # Il faudra prévenir les duplicats dans le tableau MPE. D'ailleurs, il faut
+                    if [ ! -d "${MPE[$X]}" ]           # Il faudra prévenir les duplicats dans le tableau MPE. D'ailleurs, il faut
                     then                           # faire la même chose pour le tableau NFSLIST...
-                        mkdir -p MPE[$X]
+                        mkdir -p "${MPE[$X]}"
+                        Done "${MPE[$X]} cree" "OK"
                     fi
                     [ $((++X)) ]
                 else 
@@ -141,7 +144,7 @@ function init_nfs_data()
         TITRE="Script du montage du nuage en NFS généré."
         question "Est-il désiré de copier le script sous /etc/NetworkManager/dispacher.d/ ?[O/n]" 2
         if [ -z ${REPONSE[1]} ] || [ ${REPONSE[1]} == "O" ] || [ ${REPONSE[1]} == "o" ]; then 
-            if ! cp $NfsCloudSH /etc/NetworkManager/dispacher.d; then
+            if ! cp $NfsCloudSH /etc/NetworkManager/dispatcher.d; then
                 Erreur " La copie du script vers /etc/NetworkManager/dispacher.d/ a échoué."
                 return 1
             fi
@@ -221,19 +224,22 @@ function nfs_progs()
 function NFSMain()
 {
     
-    Sel=0
+    #Sel=0
     
-    menu "Configuration Initale" "Support logiciel NFS" "Service Système (systemctl)" "Retour/Terminé"
+    #menu "Configuration Initale" "Support logiciel NFS" "Service Système (systemctl)" "Retour/Terminé"
     
-    Sel=${REPONSDE[0]}
-    case $Sel in
+    #Sel=${REPONSDE[0]}
+    #case $Sel in 
     
     init_nfs_data
     [ $? -eq 1 ] && return 1
-    nfs_progs
-    [ $? -eq 1 ] && return 1
+    #nfs_progs
+    #[ $? -eq 1 ] && return 1
     
-    
+}
+
+NFSMain
+
     
 # 
 # 

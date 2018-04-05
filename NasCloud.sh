@@ -2,17 +2,15 @@
 
 if [ "$2" = "up" ]; then
 
-    mount -t nfs 192.168.2.62:/nfs/bretzelus  /Cloud/bretzelus
-    mount -t nfs 192.168.2.62:/nfs/Public  /Cloud/public
-    mount -t nfs 192.168.2.62:/nfs/maryse  /Cloud/maryse
-    mount -t nfs 192.168.2.62:/nfs/xilef  /Cloud/xilef
+    mount -t nfs netfs:/nfs/bretzelus  /netfs/b
+    mount -t nfs netfs:/nfs/Public  /netfs/p
+    mount -t nfs netfs:/nfs/xilef  /netfs/x
 
 elif [ "$2" = "down" ]; then
 
-    umount /Cloud/b
-    umount /Cloud/public
-    umount /Cloud/maryse
-    umount /Cloud/xilef
+    umount /netfs/b
+    umount /netfs/p
+    umount /netfs/x
 
 fi
 
