@@ -11,11 +11,6 @@ Files[2]="FixQtMicroScrollBug.sh"
 Files[3]="SetupNuage.sh"
 Files[4]="Archive.etc.sh"
 
-
-
-
-
-
 CSUP="A"
 CSDOWN="B"
 
@@ -29,6 +24,10 @@ CL_RESET="\033[0m"
 CL_QUESTION="\033[0;30;46m"
 CL_QUESTION_SEL="\033[0;34;46m"
 
+declare -A CloudNFSData=( [Ip]="Undefined" [MountPoint]="Undefined" [NetAlias]="Undefined" )
+declare -A CloudFields=( [Ip]="30 2" [MountPoint]="x y" [NetAlias]="x y" )
+
+export CloudNFSData CloudFields
 
 
 
@@ -36,7 +35,7 @@ USERNAME=`id -u -n`
 source /etc/os-release
 DISTNAME=$ID 
 let TTL_LINE=0
-export DISTNAME IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL TTL_LINES TTL_LINE
+export DISTNAME IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL CL_EXPECT CL_EXPECT_SZ TTL_LINES TTL_LINE
 export REPONSE=" "
 
 x_pos=0
@@ -51,24 +50,46 @@ fi
 
 export ligne=`printf "%$(expr $COLUMNS - 10)s"`
 
-Status()
+
+function Expect()
 {
-    let x=$(expr $COLUMNS - 5)
-    let y=$(expr $LINES - 1)
-    gotoxy 1 $y
-    printf "\033[1;37m$1"
-    gotoxy $x $y
-    if [ $2 == "NO" ]; then
-        printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n\n"
-    else 
-        if [ $2 == "OK" ]; then
-            
-            printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n\n"
-        else 
-            M=$2
-            printf "\033[1;37m[\033[1;32m${M:0:2}\033[1;37m]\n\n"
+    n=$#
+    let CL_EXPECT_SZ=0
+    for D in $@ 
+    do 
+        unset CL_EXPECT[$CL_EXPECT_SZ]
+        CL_EXPECT[$CL_EXPECT_SZ]="$D"
+        [ $((CL_EXPECT_SZ++)) ]
+    done
+}
+
+function Expected()
+{
+    #Done "${CL_EXPECT[@]}" "OK"
+    for D in "${CL_EXPECT[@]}"
+    do
+        #Done "$1 <=> $D" "OK"
+        if [ "$1" == "$D" ]
+        then
+            REPONSE[0]="OK"
+            return 0
         fi
-    fi
+    done
+    REPONSE[0]="NO"
+    return 1
+}
+
+function DisplayTitleLines()
+{
+    let x=0
+    let Y=$TTL_LINE+1
+    while [ $x -lt $Y ]
+    do
+        gotoxy 3 $(expr $x + 1)
+        D="${TTL_LINES[$x]}"
+        printf "$D"
+        [ $((x++)) ]
+    done
 }
 
 function Wait()
@@ -79,13 +100,38 @@ function Wait()
 
 function AddTitleLine()
 {
-    if [ -n $2 ]; then 
-        [ $2 == "clear" ] && let TTL_LINE=0
-    else
-        [ $(( ++TTL_LINE )) ]
-        TTL_LINES[$TTL_LINE]=$1
-    fi
+    for D in "$@"
+    do
+        if [ "$D" == "clear" ]; then 
+            let TTL_LINE=0
+        else
+            [ $((++TTL_LINE)) ]
+            TTL_LINES[$TTL_LINE]="$D"
+        fi
+    done
 }
+
+Status()
+{
+    let x=$(expr $COLUMNS - 5)
+    let y=$(expr $LINES - 2)
+    gotoxy 1 $y
+    printf "\033[1;37m$1"
+    gotoxy $x $y
+    if [ $2 == "NO" ]; then
+        printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n"
+    else 
+        if [ $2 == "OK" ]; then
+            
+            printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n"
+        else 
+            M=$2
+            printf "\033[1;37m[\033[1;32m${M:0:2}\033[1;37m]\n"
+        fi
+    fi
+    Wait 10 x
+}
+
 
 function Erreur()
 {

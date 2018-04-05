@@ -35,16 +35,25 @@ function init_nfs_data()
     {
         TITRE="(Données initiales [$CL_ERR$DISTNAME$CL_WINBCK])"
         question "Adresse IP du Nuage:" 16 "Point de montage racine locale:" 40 "Alias:" 40
-    
+            
         IP=${REPONSE[1]}
         Local=${REPONSE[2]}
         HostAlias=${REPONSE[3]}
-
+    
         if [ -z "$IP" ] || [ -z "$Local" ]; then 
             Done " Configuration du nuage avorté." "NO"
             return 1
         fi
 
+        AddTitleLine "clear" " Initialisation des données du Nuage sous le protocole NFS:"
+        AddTitleLine "..........................................................."
+        AddTitleLine "Adresse IP: $IP" "Chemin racine locale: $Local" "Alias du nom: $HostAlias"
+        
+        DisplayTitleLines
+        
+        Status "Terminé. Appuyer pour retourner." "OK"        
+        return 1
+        
         O=`grep "$IP" /etc/hosts` # Isoler la sortie de grep dans une variable ( $O ). 
         if [ -z  "$O" ]; then     # Pour pouvoir isoler ici la chaîne de caractères en une seule pour éviter une erreur de surplus d'arguments.
             question "Est-il souhaité de renseigner /etc/hosts [O/n] ?" 2
@@ -166,9 +175,9 @@ function init_nfs_data()
     
     
     init_root_locations
-    [ $? = 1 ] && return 1
+    [ $? -eq 1 ] && return 1
     set_binds
-    [ $? = 1 ] && return 1
+    [ $? -eq 1 ] && return 1
     generate_script
     return 0
 }
@@ -233,6 +242,15 @@ function nfs_progs()
 function NFSMain()
 {
     let sel=0
+    
+    gotoxy ${CloudFields[Ip]}
+    AA=${CloudNFSData[Ip]}
+    printf "IP: $AA\n"
+    CloudNFSData[Ip]="192.168.2.62"
+    AA=${CloudNFSData[Ip]}    
+    Status " testing cloudfields terminé[$AA]: Appuyer pour retourner.." "OK"
+    return 1
+    
     while [ $sel -ne 4 ]
     do
         TITRE="Configuration du Nuage protocole nfs:"
