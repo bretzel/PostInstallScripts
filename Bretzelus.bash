@@ -34,7 +34,7 @@ source RemoteDestination.bash
 
 USERNAME=`id -u -n`
 source /etc/os-release
-DISTNAME=$ID 
+DISTNAME=$ID
 let TTL_LINE=0
 export DISTNAME IN_FIELD CL_ERR CL_DTA CL_MENUNORMAL CL_MENUSELECT CL_WINBCK CL_RESET CL_QUESTION CL_QUESTION_SEL CL_EXPECT CL_EXPECT_SZ TTL_LINES TTL_LINE
 export REPONSE=" "
@@ -56,8 +56,8 @@ function Expect()
 {
     n=$#
     let CL_EXPECT_SZ=0
-    for D in $@ 
-    do 
+    for D in $@
+    do
         unset CL_EXPECT[$CL_EXPECT_SZ]
         CL_EXPECT[$CL_EXPECT_SZ]="$D"
         [ $((CL_EXPECT_SZ++)) ]
@@ -103,7 +103,7 @@ function AddTitleLine()
 {
     for D in "$@"
     do
-        if [ "$D" == "clear" ]; then 
+        if [ "$D" == "clear" ]; then
             let TTL_LINE=0
         else
             [ $((++TTL_LINE)) ]
@@ -121,11 +121,11 @@ Status()
     gotoxy $x $y
     if [ $2 == "NO" ]; then
         printf "\033[1;37m[\033[1;31mNO\033[1;37m]\n"
-    else 
+    else
         if [ $2 == "OK" ]; then
-            
+
             printf "\033[1;37m[\033[1;32mOK\033[1;37m]\n"
-        else 
+        else
             M=$2
             printf "\033[1;37m[\033[1;32m${M:0:2}\033[1;37m]\n"
         fi
@@ -281,13 +281,13 @@ question()
         printf "$CL_WINBCK${ligne:0:$(expr $longueur + 5)}$CL_RESET\n"
         [ $((++c)) ]
     done
-    
+
     gotoxy $x_pos $y_pos
     printf "$CL_WINBCK$TITRE"
     gotoxy $x_pos $(expr $y_pos + 1)
     let c=1
     # afficher le fond de la zone de question en CYAN
-    
+
     while [ $c -le $nbQuestions ]
     do
         gotoxy $(expr $x_pos + 2)  $(expr $c + $y_pos)
@@ -547,12 +547,12 @@ function Main()
 {
     let sel=0
 
-    while [ $sel != 8 ]
+    while [ $sel != 9 ]
     do
     TITRE="   Menu Principale:   "
-    menu TestSelecteur Archiver Désarchiver "Micro-Scolling de QT sous Plasma" "Configurer le Nuage NFS" "Sauvegarder /etc" "Gestion Usagers" Quitter
+    menu TestSelecteur Archiver Désarchiver "Micro-Scolling de QT sous Plasma" "Configurer le Nuage NFS" "Sauvegarder /etc" "Gestion Usagers" "Neofetch" Quitter
     sel=${REPONSE[0]}
-    
+
     case $sel in
     1)
         TestSelecteur
@@ -579,6 +579,10 @@ function Main()
         Usagers
         ;;
     8)
+        Clear
+        goxo 1 7
+        ;;
+    9)
         TITRE="           Quitter"
         question "Êtes-vous sûr de vouloir Quitter? [n/N:Non] (Defaut:Oui)" 4
         Clear
