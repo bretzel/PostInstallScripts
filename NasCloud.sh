@@ -2,13 +2,13 @@
 
 if [ "$2" = "up" ]; then
 
-    mount -t nfs netfs:/nfs/bretzelus  /netfs/bretzelus
-    mount -t nfs netfs:/Public  /netfs/shared
+    mount -t nfs homefs:/nfs/bretzelus  /homefs/bretzelus
+    mount -t nfs homefs:/nfs/Public  /homefs/Share
 
 elif [ "$2" = "down" ]; then
 
-    umount /netfs/bretzelus
-    umount /netfs/shared
+    umount /homefs/bretzelus
+    umount /homefs/Share
 
 fi
 

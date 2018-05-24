@@ -166,6 +166,7 @@ function init_nfs_data()
         return 0
     }
 
+
 #        Output=`mount | grep "$Local"`
 #        if [ -z $Output ]; then
 #            TITRE="Connection temporaire au nuage:"
@@ -179,10 +180,20 @@ function init_nfs_data()
     set_binds
     [ $? -eq 1 ] && return 1
     generate_script
+    
     return 0
 }
 
-
+    function do_mount()
+    {
+        X=0
+        TITRE="Se connecter au point de montage:" 
+        question "Est-il souhaité de se connecter tout-de-suite [O/n]? " 2
+        if [ -z ${REPONSE[1]} ] || [ ${REPONSE[1]} == "O" ] || [ ${REPONSE[1]} == "o" ]; then
+            source ./NasCloud.sh up up
+            return 0
+        fi
+    }   
 
 
 function nfs_progs()
@@ -274,6 +285,9 @@ function NFSMain()
         ;;
         esac
     done
+    # testing:
+    do_mount
+    # testing[ $? -eq 1 ] && return 1
     
     return  0
 }
