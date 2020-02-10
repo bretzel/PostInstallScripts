@@ -130,7 +130,7 @@ function init_nfs_data()
         Status "Génération du script montage NFS pour NetworkManager::Dispacher:" "OK"
         echo "#.bin/sh"                             >  $NfsCloudSH
         echo ""                                     >> $NfsCloudSH
-        echo "if [ \""\$2\"" = \"up\" ]; then"      >> $NfsCloudSH
+        echo "if [ \""\$2\"" = \"up\" ] || [ \"$1\" == \"up\" ]; then"      >> $NfsCloudSH
         echo ""                                     >> $NfsCloudSH
         X=0
         for F in ${NFSLIST[@]}
@@ -141,7 +141,7 @@ function init_nfs_data()
         echo ""                                     >> $NfsCloudSH
     
         X=0
-        echo "elif [ \""\$2\"" = \"down\" ]; then"  >> $NfsCloudSH
+        echo "elif [ \""\$2\"" = \"down\" ] || [ \"$1\" == \"down\" ]; then"  >> $NfsCloudSH
         echo ""                                     >> $NfsCloudSH
         for F in ${NFSLIST[@]}
         do
